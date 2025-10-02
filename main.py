@@ -29,9 +29,10 @@ def process():
     Ejecuta el flujo original sin alterar el orden de operaciones ni la lógica.
     Devuelve logs y un resumen del resultado.
     """
+
+    logs = []
     log_print(logs, f"TOKEN: {TOKEN}")
     log_print(logs, f"TOKEN2: {TOKEN2}")
-    logs = []
     try:
         # ========= BLOQUE 1: Llamada a la API con TOKEN =========
         log_print(logs, "=== OBTENIENDO Y PROCESANDO DATOS ===")
@@ -221,6 +222,7 @@ def process():
 
 
 # Ejecutar con: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
 
 
 
