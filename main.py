@@ -207,8 +207,6 @@ def process():
         sample = data.head(1).to_json(orient="records")
         return {
             "ok": True,
-            "logs": logs,
-            "result_rows": len(data),
             "sample": sample,
             "data": data_final_json
         }
@@ -222,6 +220,7 @@ def process():
 
 
 # Ejecutar con: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
 
 
 
