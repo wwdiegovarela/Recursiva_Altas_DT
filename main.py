@@ -14,7 +14,8 @@ app = FastAPI(title="WFSA - Proceso ControlRoll", version="1.0.0")
 API_LOCAL_URL = os.getenv("API_LOCAL_URL")
 TOKEN = os.getenv("TOKEN")
 TOKEN2 = os.getenv("TOKEN2")
-
+log_print(logs, TOKEN)
+log_print(logs, TOKEN2)
 def log_print(logs, msg):
     print(msg)
     logs.append(str(msg))
@@ -215,6 +216,7 @@ def process():
         log_print(logs, f"❌ Error en proceso: {err}")
         log_print(logs, f"❌ Stack trace: {traceback.format_exc()}")
         return JSONResponse(status_code=500, content={"ok": False, "error": err, "logs": logs})
+
 
 
 # Ejecutar con: uvicorn main:app --reload --host 0.0.0.0 --port 8000
