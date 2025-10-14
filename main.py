@@ -13,11 +13,13 @@ from datetime import datetime, timedelta
 app = FastAPI(title="WFSA - Proceso ControlRoll", version="1.0.0")
 
 # === Configuración desde variables de entorno ===
-API_LOCAL_URL = os.getenv("API_LOCAL_URL", "https://cl.controlroll.com/ww01/ServiceUrl.aspx")
-TOKEN = os.getenv("TOKEN")
-TOKEN2 = os.getenv("TOKEN2")
-TOKEN3 = os.getenv("TOKEN3")
-TOKEN4 = os.getenv("TOKEN4")
+API_LOCAL_URL = os.getenv("API_LOCAL_URL")
+TOKEN_ALTAS = os.getenv("TOKEN_ALTAS")
+TOKEN_ALTAS2 = os.getenv("TOKEN_ALTAS2")
+TOKEN_DOC_FIRMA = os.getenv("TOKEN_DOC_FIRMA_WALMART")
+TOKEN_DOC_CARPETA = os.getenv("TOKEN_DOC_CARPETA_WALMART")
+TOKEN_ASISTENCIA = os.getenv("TOKEN_ASISTENCIA_WALMART")
+TOKEN_TRANSFERENCIAS = os.getenv("TOKEN_ASISTENCIA_WALMART")
 
 def log_print(logs, msg):
     print(msg)
@@ -53,7 +55,7 @@ def traducir_mes_en_espanol(texto):
             return texto.replace(en, es)
     return texto
 
-def agregar_nombre_subcontrataley(df, columna_instalacion="Instalacion"):
+def agregar_nombre_subcontrataley_walmart(df, columna_instalacion):
     """Agrega la columna instalacion_subcontrataley mapeando instalaciones"""
     mapa_instalaciones = {
         "LIDER PUENTE ALTO (JOSE LUIS COO) LOCAL 208": "Express 400_208_Plaza P.Alto Y Jose Luis Coo",
@@ -150,7 +152,7 @@ def get_mantenedor():
 def health():
     return {"status": "ok"}
 
-@app.get("/dt/firmas")
+@app.get("/subcontrataley/walmart/firmas")
 def get_firmas():
     """
     Obtiene datos de firmas del mes anterior
@@ -158,7 +160,7 @@ def get_firmas():
     """
     try:
         fecha_desde, fecha_hasta = intervalo_fechas()
-        data_firma = consulta_cr(TOKEN)
+        data_firma = consulta_cr(TOKEN_DOC_FIRMA)
     data_firma['flog'] = pd.to_datetime(data_firma['flog'], format='%Y-%m-%d %H:%M:%S')
         data_firma = data_firma.loc[(data_firma.flog >= fecha_desde) & (data_firma.flog <= fecha_hasta)]
         data_firma = data_firma.loc[data_firma.firma_del_colaborador == "Firmado Colaborador"][['rut', 'nombre_del_documento', 'tipo_del_documento', 'flog']]
@@ -179,15 +181,15 @@ def get_firmas():
             content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
         )
 
-@app.get("/dt/documentos")
-def get_documentos():
+@app.get("/subcontrataley/walmart/carpeta")
+def get_carpeta():
     """
     Obtiene datos normalizados de documentos del mes anterior
     GET /dt/documentos
     """
     try:
         fecha_desde, fecha_hasta = intervalo_fechas()
-        data_norm = consulta_cr(TOKEN2)
+        data_norm = consulta_cr(TOKEN_DOC_CARPETA)
     data_norm['flog'] = pd.to_datetime(data_norm['flog'], format='%Y-%m-%d %H:%M:%S')
         data_norm = data_norm.loc[(data_norm.flog >= fecha_desde) & (data_norm.flog <= fecha_hasta)]
         data_norm = data_norm[["rut", "tipo_documento", "nombre_documento", "flog"]]
@@ -207,14 +209,14 @@ def get_documentos():
             content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
         )
 
-@app.get("/dt/asistencia")
+@app.get("/subcontrataley/walmart/asistencia")
 def get_asistencia():
     """
     Obtiene datos de asistencia (FaceID enrolados)
     GET /dt/asistencia
     """
     try:
-        data_asistencia = consulta_cr(TOKEN3)
+        data_asistencia = consulta_cr(TOKEN_ASISTENCIA)
         data_asistencia = data_asistencia.loc[data_asistencia['faceid_enrolado'] == "SI"]
         fecha_desde, fecha_hasta = intervalo_fechas()
         data_asistencia = data_asistencia[["rut", "cliente", "instalacion", "cecos"]]
@@ -222,7 +224,7 @@ def get_asistencia():
         data_asistencia = data_asistencia.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "documento_cr_carpeta"]], left_on="tipo_documento", right_on="documento_cr_carpeta", how="left")
         data_asistencia['Desde'] = fecha_desde.strftime('%d-%m-%Y')
         data_asistencia['Hasta'] = fecha_hasta.strftime('%d-%m-%Y')
-        data_asistencia = agregar_nombre_subcontrataley(data_asistencia, columna_instalacion="instalacion")
+        data_asistencia = agregar_nombre_subcontrataley_walmart(data_asistencia, columna_instalacion="instalacion")
         
         result = data_asistencia.replace({np.nan: None}).to_dict(orient="records")
         return {
@@ -237,14 +239,14 @@ def get_asistencia():
             content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
         )
 
-@app.get("/dt/liquidaciones")
+@app.get("/subcontrataley/walmart/liquidaciones")
 def get_liquidaciones():
     """
     Obtiene datos de liquidaciones por instalación
     GET /dt/liquidaciones
     """
     try:
-        data_liquidaciones = consulta_cr(TOKEN3)
+        data_liquidaciones = consulta_cr(TOKEN_ASISTENCIA)
         data_liquidaciones = data_liquidaciones[["cliente", "instalacion", "cecos"]].drop_duplicates()
         data_liquidaciones['tipo_documento'] = 'Liquidaciones'
         data_liquidaciones = data_liquidaciones.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "tablero2"]], left_on="tipo_documento", right_on="tablero", how="left")
@@ -253,7 +255,7 @@ def get_liquidaciones():
         data_liquidaciones['periodo'] = fecha_hasta
         data_liquidaciones['periodo'] = data_liquidaciones['periodo'].dt.strftime('%B %Y')
         data_liquidaciones['periodo'] = data_liquidaciones['periodo'].apply(traducir_mes_en_espanol)
-        data_liquidaciones = agregar_nombre_subcontrataley(data_liquidaciones, columna_instalacion="instalacion")
+        data_liquidaciones = agregar_nombre_subcontrataley_walmart(data_liquidaciones, columna_instalacion="instalacion")
         
         result = data_liquidaciones.replace({np.nan: None}).to_dict(orient="records")
         return {
@@ -268,18 +270,18 @@ def get_liquidaciones():
             content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
         )
 
-@app.get("/dt/transferencias")
+@app.get("/subcontrataley/walmart/transferencias")
 def get_transferencias():
     """
     Obtiene datos de transferencias
     GET /dt/transferencias
     """
     try:
-        data_transferencias = consulta_cr(TOKEN4)
+        data_transferencias = consulta_cr(TOKEN_TRANSFERENCIAS)
         data_transferencias['tipo_documento'] = 'TRANSFERENCIA'
         data_transferencias = data_transferencias.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "tablero2", "tablero3", "documento_cr_carpeta"]], left_on="tipo_documento", right_on="documento_cr_carpeta", how="left")
         data_transferencias = data_transferencias[["instalacion", "codcecoscr", "modulo", "tablero", "tipo_documento", "nombre_archivo", "Documentos_subcontrataley", "flog"]]
-        data_transferencias = agregar_nombre_subcontrataley(data_transferencias, columna_instalacion="instalacion")
+        data_transferencias = agregar_nombre_subcontrataley_walmart(data_transferencias, columna_instalacion="instalacion")
         
         result = data_transferencias.replace({np.nan: None}).to_dict(orient="records")
         return {
@@ -294,7 +296,7 @@ def get_transferencias():
         )
 
 @app.get("/dt/altas")
-def process():
+def get_altas():
     """
     Ejecuta el flujo original sin alterar el orden de operaciones ni la lógica.
     Devuelve logs y un resumen del resultado.
