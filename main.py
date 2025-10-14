@@ -8,22 +8,292 @@ import json
 import os
 import traceback
 import numpy as np
+from datetime import datetime, timedelta
+
 app = FastAPI(title="WFSA - Proceso ControlRoll", version="1.0.0")
 
-# === Configuración desde variables de entorno (igual que el flujo original) ===
-API_LOCAL_URL = os.getenv("API_LOCAL_URL")
+# === Configuración desde variables de entorno ===
+API_LOCAL_URL = os.getenv("API_LOCAL_URL", "https://cl.controlroll.com/ww01/ServiceUrl.aspx")
 TOKEN = os.getenv("TOKEN")
 TOKEN2 = os.getenv("TOKEN2")
+TOKEN3 = os.getenv("TOKEN3")
+TOKEN4 = os.getenv("TOKEN4")
 
 def log_print(logs, msg):
     print(msg)
     logs.append(str(msg))
 
+# ========== FUNCIONES DE UTILIDAD ==========
+
+def traducir_mes_en_espanol(texto):
+    """
+    Traduce un texto con formato 'Month YYYY' de inglés a español.
+    Ejemplo: 'September 2025' -> 'Septiembre 2025'
+    """
+    meses = {
+        "January": "Enero",
+        "February": "Febrero",
+        "March": "Marzo",
+        "April": "Abril",
+        "May": "Mayo",
+        "June": "Junio",
+        "July": "Julio",
+        "August": "Agosto",
+        "September": "Septiembre",
+        "October": "Octubre",
+        "November": "Noviembre",
+        "December": "Diciembre"
+    }
+    
+    if pd.isna(texto):
+        return texto
+
+    for en, es in meses.items():
+        if texto.startswith(en):
+            return texto.replace(en, es)
+    return texto
+
+def agregar_nombre_subcontrataley(df, columna_instalacion="Instalacion"):
+    """Agrega la columna instalacion_subcontrataley mapeando instalaciones"""
+    mapa_instalaciones = {
+        "LIDER PUENTE ALTO (JOSE LUIS COO) LOCAL 208": "Express 400_208_Plaza P.Alto Y Jose Luis Coo",
+        "LIDER PUENTE ALTO (MALEBRAN) LOCAL 280": "Express 400_280_Ciudad Del Sol",
+        "LIDER PUENTE ALTO (DIEGO PORTALES) LOCAL 613": "Express_613_Ciudad Del Este",
+        "LIDER LA FLORIDA (SANCHEZ FONTECILLA) LOCAL 611": "Express_611_Rojas Magallanes",
+        "LIDER C DE LOS VALLE PUDAHUEL (Local 963)": "Express_963_Ciudad De Los Valles",
+        "LIDER MACUL (FROILAN ROA) LOCAL 498": "Express 400_498_Froilán Roa",
+        "LIDER GRECIA ÑUÑOA (LOCAL 52)": "Express_52_Grecia",
+        "LIDER PLAZA LOS DOMINICOS LAS CONDES (LOCAL 624)": "Express_624_La Plaza",
+        "LIDER QUINTA NORMAL (CARRASCAL) LOCAL 233": "Express 400_233_Carrascal",
+        "LIDER QUILICURA (LOCAL 248)": "Express_248_Quilicura",
+        "LIDER LAS REJAS (local 140)": "Express_140_Las Rejas",
+        "LIDER MARCOLETA (LOCAL 671)": "Lider_671_Marcoleta",
+        "LIDER LA CALERA (LOCAL 983)": "Lider_983_La Calera",
+        "LIDER PEÑAFLOR (LOCAL 736)": "Lider_736_Peñaflor",
+        "LIDER CONCEPCION (LOCAL 89)": "Lider_89_Biobío",
+        "LIDER CONCEPCION (LOCAL 98)": "Lider_98_Concepción",
+        "DISPONIBLES WALMART": "Apoyo_Seguridad_Walmart",
+        "ACUENTA ANDALIEN CONCEPCION LOCAL 505": "SBA_505_Andalien",
+        "ACUENTA VALDIVIA (LOCAL 522)": "SBA_522_Valdivia Terminal",
+        "ACUENTA MARIQUINA LOCAL 948": "SBA_948_Mariquina (Los Rios)",
+        "ACUENTA PICARTE (LOCAL 559)": "SBA_559_Picarte Valdivia",
+        "ACUENTA FUNDADORES (LOCAL 558)": "SBA_558_Fundadores"
+    }
+    df["instalacion_subcontrataley"] = df[columna_instalacion].map(mapa_instalaciones)
+    return df
+
+def intervalo_fechas():
+    """Retorna el primer y último día del mes anterior"""
+    hoy = datetime.today()
+    primer_dia_mes_actual = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    fecha_hasta = primer_dia_mes_actual - timedelta(seconds=1)
+    fecha_desde = fecha_hasta.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    return fecha_desde, fecha_hasta
+
+def consulta_cr(token):
+    """Consulta la API de ControlRoll y retorna un DataFrame normalizado"""
+    headers = {
+        "method": "report",
+        "token": token
+    }
+    response = requests.get(API_LOCAL_URL, headers=headers, timeout=3600)
+    data_text = response.text
+    data_json = json.loads(data_text)
+    data = pd.DataFrame(data_json)
+    
+    # Normalizar nombres de columnas
+    data.columns = data.columns.str.lower()
+    data.columns = data.columns.str.replace(' ', '_')
+    data.columns = data.columns.str.replace('.', '')
+    data.columns = data.columns.str.replace('%', '')
+    data.columns = data.columns.str.replace('-', '_')
+    data.columns = data.columns.str.replace('(', '')
+    data.columns = data.columns.str.replace(')', '')
+    data.columns = data.columns.str.replace('á', 'a')
+    data.columns = data.columns.str.replace('é', 'e')
+    data.columns = data.columns.str.replace('í', 'i')
+    data.columns = data.columns.str.replace('ó', 'o')
+    data.columns = data.columns.str.replace('ú', 'u')
+    data.columns = data.columns.str.replace('ñ', 'n')
+    data.columns = data.columns.str.replace('°', '')
+    return data
+
+def get_mantenedor():
+    """Retorna el DataFrame de mantenedor de documentos"""
+    mantenedor_data = [
+        {"Documentos_subcontrataley": "Certificado Curso OS10", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "OS10", "documento_cr_carpeta2": "Certificado Curso"},
+        {"Documentos_subcontrataley": "Liquidaciones de Sueldo", "modulo": "REMUNERACIONES", "tablero": "Liquidaciones", "tablero2": "Por Centro de Costo"},
+        {"Documentos_subcontrataley": "Toma de Conoc. de Trab. Información de Riesgos Laborales", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "KIT PREVENCION DE RIESGOS"},
+        {"Documentos_subcontrataley": "Contratos de Trabajo", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "Contrato"},
+        {"Documentos_subcontrataley": "Toma Conoc. Trab. Procedimiento de Trabajo Seguro", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "KIT PREVENCION DE RIESGOS"},
+        {"Documentos_subcontrataley": "Registro Difusión Trabajador Reglamento Interno", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "Contrato"},
+        {"Documentos_subcontrataley": "Toma Conoc. Trab. Matriz IPER del Contratista", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "KIT PREVENCION DE RIESGOS"},
+        {"Documentos_subcontrataley": "Toma Conoc. Trab. Programa de Trabajo Preventivo", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "KIT PREVENCION DE RIESGOS"},
+        {"Documentos_subcontrataley": "Capacitación Uso y Mantención de EPP", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "Capacitacion Uso EPP"},
+        {"Documentos_subcontrataley": "Capacitación para Pers. Trab. en Prevención de Riesgos Laborales", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "KIT PREVENCION DE RIESGOS"},
+        {"Documentos_subcontrataley": "Carta Aviso Despido o Renuncia", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "CARTAS DESPIDO"},
+        {"Documentos_subcontrataley": "Carta Aviso Despido o Renuncia", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "RENUNCIA VOLUNTARIA"},
+        {"Documentos_subcontrataley": "Finiquitos de Contrato", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "Finiquito"},
+        {"Documentos_subcontrataley": "Anexo Traslado", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "AnexoTraslado"},
+        {"Documentos_subcontrataley": "Liquidaciones de Sueldo", "modulo": "COMERCIAL", "tablero": "Carpeta Instalación", "documento_cr_carpeta": "TRANSFERENCIA"},
+        {"Documentos_subcontrataley": "Entrega EPP", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "Entrega de EPP"},
+        {"Documentos_subcontrataley": "Cédulas de Identidad", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "Cedula Identidad"},
+        {"Documentos_subcontrataley": "Certificado de Antecedentes", "Tipo_Flujo": "1", "modulo": "RRHH", "tablero": "Carpeta", "documento_cr_carpeta": "CONTRACTUAL", "documento_cr_carpeta2": "Certificado Antecedentes"},
+        {"Documentos_subcontrataley": "Libro de Asistencia", "Tipo_Flujo": "3", "modulo": "OPERACIONES", "tablero": "FaceID", "tablero2": "Reportería", "tablero3": "Libro Asistencia por Colaborador", "documento_cr_carpeta": "Asistencia"},
+        {"Documentos_subcontrataley": "Recepción Reglamento Especial de Empresas Contratistas (Trabajador)", "Tipo_Flujo": "2", "modulo": "RRHH", "tablero": "Formatos", "documento_cr_carpeta": "Documentos Por Firmar", "documento_cr_carpeta2": "KIT PREVENCION DE RIESGOS"}
+    ]
+    return pd.DataFrame(mantenedor_data)
+
+# ========== ENDPOINTS DE LA API ==========
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.get("/process")
+@app.get("/dt/firmas")
+def get_firmas():
+    """
+    Obtiene datos de firmas del mes anterior
+    GET /dt/firmas
+    """
+    try:
+        fecha_desde, fecha_hasta = intervalo_fechas()
+        data_firma = consulta_cr(TOKEN)
+    data_firma['flog'] = pd.to_datetime(data_firma['flog'], format='%Y-%m-%d %H:%M:%S')
+        data_firma = data_firma.loc[(data_firma.flog >= fecha_desde) & (data_firma.flog <= fecha_hasta)]
+        data_firma = data_firma.loc[data_firma.firma_del_colaborador == "Firmado Colaborador"][['rut', 'nombre_del_documento', 'tipo_del_documento', 'flog']]
+        data_firma["tipo_del_documento"].loc[(data_firma.tipo_del_documento == "AnexoPersonalizado") & (data_firma.nombre_del_documento == "KIT PREVENCION DE RIESGOS")] = "KIT PREVENCION DE RIESGOS"
+        data_firma = data_firma.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "documento_cr_carpeta", "documento_cr_carpeta2"]], left_on="tipo_del_documento", right_on="documento_cr_carpeta2", how="left")
+        data_firma = data_firma[["rut", "modulo", "tablero", "documento_cr_carpeta", "tipo_del_documento", "nombre_del_documento", "Documentos_subcontrataley", "flog"]]
+        
+        result = data_firma.replace({np.nan: None}).to_dict(orient="records")
+        return {
+            "ok": True,
+            "periodo": {"desde": fecha_desde.isoformat(), "hasta": fecha_hasta.isoformat()},
+            "total_registros": len(result),
+            "data": result
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
+        )
+
+@app.get("/dt/documentos")
+def get_documentos():
+    """
+    Obtiene datos normalizados de documentos del mes anterior
+    GET /dt/documentos
+    """
+    try:
+        fecha_desde, fecha_hasta = intervalo_fechas()
+        data_norm = consulta_cr(TOKEN2)
+    data_norm['flog'] = pd.to_datetime(data_norm['flog'], format='%Y-%m-%d %H:%M:%S')
+        data_norm = data_norm.loc[(data_norm.flog >= fecha_desde) & (data_norm.flog <= fecha_hasta)]
+        data_norm = data_norm[["rut", "tipo_documento", "nombre_documento", "flog"]]
+        data_norm = data_norm.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "documento_cr_carpeta", "documento_cr_carpeta2"]], left_on="tipo_documento", right_on="documento_cr_carpeta2", how="left")
+        data_norm = data_norm[["rut", "modulo", "tablero", "documento_cr_carpeta", "tipo_documento", "nombre_documento", "Documentos_subcontrataley", "flog"]]
+        
+        result = data_norm.replace({np.nan: None}).to_dict(orient="records")
+        return {
+            "ok": True,
+            "periodo": {"desde": fecha_desde.isoformat(), "hasta": fecha_hasta.isoformat()},
+            "total_registros": len(result),
+            "data": result
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
+        )
+
+@app.get("/dt/asistencia")
+def get_asistencia():
+    """
+    Obtiene datos de asistencia (FaceID enrolados)
+    GET /dt/asistencia
+    """
+    try:
+        data_asistencia = consulta_cr(TOKEN3)
+        data_asistencia = data_asistencia.loc[data_asistencia['faceid_enrolado'] == "SI"]
+        fecha_desde, fecha_hasta = intervalo_fechas()
+        data_asistencia = data_asistencia[["rut", "cliente", "instalacion", "cecos"]]
+        data_asistencia['tipo_documento'] = 'Asistencia'
+        data_asistencia = data_asistencia.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "documento_cr_carpeta"]], left_on="tipo_documento", right_on="documento_cr_carpeta", how="left")
+        data_asistencia['Desde'] = fecha_desde.strftime('%d-%m-%Y')
+        data_asistencia['Hasta'] = fecha_hasta.strftime('%d-%m-%Y')
+        data_asistencia = agregar_nombre_subcontrataley(data_asistencia, columna_instalacion="instalacion")
+        
+        result = data_asistencia.replace({np.nan: None}).to_dict(orient="records")
+        return {
+            "ok": True,
+            "periodo": {"desde": fecha_desde.strftime('%d-%m-%Y'), "hasta": fecha_hasta.strftime('%d-%m-%Y')},
+            "total_registros": len(result),
+            "data": result
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
+        )
+
+@app.get("/dt/liquidaciones")
+def get_liquidaciones():
+    """
+    Obtiene datos de liquidaciones por instalación
+    GET /dt/liquidaciones
+    """
+    try:
+        data_liquidaciones = consulta_cr(TOKEN3)
+        data_liquidaciones = data_liquidaciones[["cliente", "instalacion", "cecos"]].drop_duplicates()
+        data_liquidaciones['tipo_documento'] = 'Liquidaciones'
+        data_liquidaciones = data_liquidaciones.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "tablero2"]], left_on="tipo_documento", right_on="tablero", how="left")
+        data_liquidaciones = data_liquidaciones[["instalacion", "cecos", "modulo", "tablero", "Documentos_subcontrataley"]]
+        fecha_desde, fecha_hasta = intervalo_fechas()
+        data_liquidaciones['periodo'] = fecha_hasta
+        data_liquidaciones['periodo'] = data_liquidaciones['periodo'].dt.strftime('%B %Y')
+        data_liquidaciones['periodo'] = data_liquidaciones['periodo'].apply(traducir_mes_en_espanol)
+        data_liquidaciones = agregar_nombre_subcontrataley(data_liquidaciones, columna_instalacion="instalacion")
+        
+        result = data_liquidaciones.replace({np.nan: None}).to_dict(orient="records")
+        return {
+            "ok": True,
+            "periodo": fecha_hasta.strftime('%B %Y'),
+            "total_registros": len(result),
+            "data": result
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
+        )
+
+@app.get("/dt/transferencias")
+def get_transferencias():
+    """
+    Obtiene datos de transferencias
+    GET /dt/transferencias
+    """
+    try:
+        data_transferencias = consulta_cr(TOKEN4)
+        data_transferencias['tipo_documento'] = 'TRANSFERENCIA'
+        data_transferencias = data_transferencias.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "tablero2", "tablero3", "documento_cr_carpeta"]], left_on="tipo_documento", right_on="documento_cr_carpeta", how="left")
+        data_transferencias = data_transferencias[["instalacion", "codcecoscr", "modulo", "tablero", "tipo_documento", "nombre_archivo", "Documentos_subcontrataley", "flog"]]
+        data_transferencias = agregar_nombre_subcontrataley(data_transferencias, columna_instalacion="instalacion")
+        
+        result = data_transferencias.replace({np.nan: None}).to_dict(orient="records")
+        return {
+            "ok": True,
+            "total_registros": len(result),
+            "data": result
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
+        )
+
+@app.get("/dt/altas")
 def process():
     """
     Ejecuta el flujo original sin alterar el orden de operaciones ni la lógica.
@@ -89,8 +359,8 @@ def process():
         data = pd.DataFrame(data_json)
 
         # ========= BLOQUE 2: Segunda llamada a la API con TOKEN2 =========
-        headers = {
-            "method": "report",
+    headers = {
+        "method": "report",
             "token": TOKEN2
         }
         log_print(logs, f"API URL: {API_LOCAL_URL}")
@@ -132,11 +402,11 @@ def process():
             log_print(logs, "No hay datos para procesar")
 
         # Convertir a DataFrame (segundo dataset)
-        data_text = response.text
+    data_text = response.text
         log_print(logs, f"Longitud de respuesta: {len(data_text)}")
         log_print(logs, f"Primeros 200 caracteres: {data_text[:200]}")
 
-        data_json = json.loads(data_text)
+    data_json = json.loads(data_text)
         data_emp = pd.DataFrame(data_json)
 
         # Renombres/derivaciones (igual al flujo original)
