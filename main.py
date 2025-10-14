@@ -99,11 +99,31 @@ def consulta_cr(token):
         "token": token
     }
     response = requests.get(API_LOCAL_URL, headers=headers, timeout=3600)
+    response.raise_for_status()
+    
     data_text = response.text
-    data_json = json.loads(data_text)
+    
+    try:
+        data_json = json.loads(data_text)
+    except json.JSONDecodeError as e:
+        print(f"Error parseando JSON. Status code: {response.status_code}")
+        print(f"Primeros 500 caracteres: {data_text[:500]}")
+        print(f"Content-Type: {response.headers.get('Content-Type', 'N/A')}")
+        raise ValueError(f"La API no devolvió JSON válido. Status: {response.status_code}. Primeros 200 chars: {data_text[:200]}") from e
+    
+    if not isinstance(data_json, list):
+        if isinstance(data_json, dict):
+            if 'error' in data_json or 'message' in data_json:
+                raise ValueError(f"La API devolvió un error: {data_json}")
+            data_json = [data_json]
+        else:
+            raise ValueError(f"La API devolvió un tipo inesperado: {type(data_json)}")
+    
+    if len(data_json) == 0:
+        return pd.DataFrame()
+    
     data = pd.DataFrame(data_json)
     
-    # Normalizar nombres de columnas
     data.columns = data.columns.str.lower()
     data.columns = data.columns.str.replace(' ', '_')
     data.columns = data.columns.str.replace('.', '')
@@ -258,6 +278,7 @@ def get_liquidaciones():
         data_liquidaciones = agregar_nombre_subcontrataley_walmart(data_liquidaciones, columna_instalacion="instalacion")
         
         result = data_liquidaciones.replace({np.nan: None}).to_dict(orient="records")
+        
         return {
             "ok": True,
             "periodo": fecha_hasta.strftime('%B %Y'),
@@ -284,10 +305,11 @@ def get_transferencias():
         data_transferencias = agregar_nombre_subcontrataley_walmart(data_transferencias, columna_instalacion="instalacion")
         
         result = data_transferencias.replace({np.nan: None}).to_dict(orient="records")
+        result_json=data_transferencias.replace({np.nan: None}).to_dict(orient="records")
         return {
             "ok": True,
-            "total_registros": len(result),
-            "data": result
+            "total_registros": len(result_json),
+            "data": result_json
         }
     except Exception as e:
         return JSONResponse(
