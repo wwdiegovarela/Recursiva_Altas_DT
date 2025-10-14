@@ -161,7 +161,7 @@ def get_firmas():
     try:
         fecha_desde, fecha_hasta = intervalo_fechas()
         data_firma = consulta_cr(TOKEN_DOC_FIRMA)
-    data_firma['flog'] = pd.to_datetime(data_firma['flog'], format='%Y-%m-%d %H:%M:%S')
+        data_firma['flog'] = pd.to_datetime(data_firma['flog'], format='%Y-%m-%d %H:%M:%S')
         data_firma = data_firma.loc[(data_firma.flog >= fecha_desde) & (data_firma.flog <= fecha_hasta)]
         data_firma = data_firma.loc[data_firma.firma_del_colaborador == "Firmado Colaborador"][['rut', 'nombre_del_documento', 'tipo_del_documento', 'flog']]
         data_firma["tipo_del_documento"].loc[(data_firma.tipo_del_documento == "AnexoPersonalizado") & (data_firma.nombre_del_documento == "KIT PREVENCION DE RIESGOS")] = "KIT PREVENCION DE RIESGOS"
@@ -190,7 +190,7 @@ def get_carpeta():
     try:
         fecha_desde, fecha_hasta = intervalo_fechas()
         data_norm = consulta_cr(TOKEN_DOC_CARPETA)
-    data_norm['flog'] = pd.to_datetime(data_norm['flog'], format='%Y-%m-%d %H:%M:%S')
+        data_norm['flog'] = pd.to_datetime(data_norm['flog'], format='%Y-%m-%d %H:%M:%S')
         data_norm = data_norm.loc[(data_norm.flog >= fecha_desde) & (data_norm.flog <= fecha_hasta)]
         data_norm = data_norm[["rut", "tipo_documento", "nombre_documento", "flog"]]
         data_norm = data_norm.merge(get_mantenedor()[["Documentos_subcontrataley", "modulo", "tablero", "documento_cr_carpeta", "documento_cr_carpeta2"]], left_on="tipo_documento", right_on="documento_cr_carpeta2", how="left")
@@ -303,8 +303,8 @@ def get_altas():
     """
 
     logs = []
-    log_print(logs, f"TOKEN: {TOKEN}")
-    log_print(logs, f"TOKEN2: {TOKEN2}")
+    log_print(logs, f"TOKEN_ALTAS: {TOKEN_ALTAS}")
+    log_print(logs, f"TOKEN_ALTAS2: {TOKEN_ALTAS2}")
     try:
         # ========= BLOQUE 1: Llamada a la API con TOKEN =========
         log_print(logs, "=== OBTENIENDO Y PROCESANDO DATOS ===")
@@ -312,7 +312,7 @@ def get_altas():
         # Preparar parámetros para la API local
         headers = {
             "method": "report",
-            "token": TOKEN
+            "token": TOKEN_ALTAS
         }
         log_print(logs, f"API URL: {API_LOCAL_URL}")
         log_print(logs, f"Headers: {headers}")
@@ -361,9 +361,9 @@ def get_altas():
         data = pd.DataFrame(data_json)
 
         # ========= BLOQUE 2: Segunda llamada a la API con TOKEN2 =========
-    headers = {
-        "method": "report",
-            "token": TOKEN2
+        headers = {
+            "method": "report",
+            "token": TOKEN_ALTAS2
         }
         log_print(logs, f"API URL: {API_LOCAL_URL}")
         log_print(logs, f"Headers: {headers}")
@@ -404,11 +404,11 @@ def get_altas():
             log_print(logs, "No hay datos para procesar")
 
         # Convertir a DataFrame (segundo dataset)
-    data_text = response.text
+        data_text = response.text
         log_print(logs, f"Longitud de respuesta: {len(data_text)}")
         log_print(logs, f"Primeros 200 caracteres: {data_text[:200]}")
 
-    data_json = json.loads(data_text)
+        data_json = json.loads(data_text)
         data_emp = pd.DataFrame(data_json)
 
         # Renombres/derivaciones (igual al flujo original)
