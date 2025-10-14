@@ -1,130 +1,265 @@
-# Cloud Run - Sincronización de Rotación
+# Recursiva API - WFSA ControlRoll
 
-Este servicio de Cloud Run sincroniza datos de rotación de empleados desde una API externa hacia BigQuery.
+API REST para la sincronización de datos de empleados desde ControlRoll para Worldwide Facility Security S.A.
 
-## Archivos incluidos
+## 🌐 URL de Producción
+
+```
+https://recursiva-data-altas-dt-596669043554.us-east1.run.app
+```
+
+## 📋 Descripción
+
+Este servicio de Cloud Run proporciona endpoints REST para consultar y procesar datos de:
+- SubcontrataLey Walmart (firmas, documentos, asistencia, liquidaciones, transferencias)
+- Dirección del Trabajo (altas de empleados)
+
+## 📁 Archivos del proyecto
 
 - `main.py` - Aplicación FastAPI principal
 - `requirements.txt` - Dependencias de Python
 - `Dockerfile` - Configuración de Docker para Cloud Run
-- `.dockerignore` - Archivos a ignorar en el build de Docker
-- `deploy.sh` - Script de despliegue automatizado
-- `config.example` - Ejemplo de configuración de variables de entorno
 - `README.md` - Este archivo
 
-## Variables de entorno requeridas
+## 🔧 Variables de entorno requeridas
 
-Configura las siguientes variables de entorno en tu servicio de Cloud Run:
+Configura las siguientes variables de entorno en Cloud Run:
 
+### API Externa
 - `API_LOCAL_URL` - URL de la API de ControlRoll
-- `PROJECT_ID` - ID del proyecto de GCP
-- `DATASET_ID` - ID del dataset de BigQuery
-- `TABLE_ID` - ID de la tabla de BigQuery
-- `TOKEN_CR` - Token de autenticación para la API
 
-## Despliegue a Cloud Run
+### Tokens de autenticación
+- `TOKEN_ALTAS` - Token para datos de altas (primer dataset)
+- `TOKEN_ALTAS2` - Token para datos de altas (segundo dataset)
+- `TOKEN_DOC_FIRMA_WALMART` - Token para documentos firmados de Walmart
+- `TOKEN_DOC_CARPETA_WALMART` - Token para carpeta de documentos de Walmart
+- `TOKEN_ASISTENCIA_WALMART` - Token para asistencia y liquidaciones de Walmart
+- `TOKEN_TRANSFERENCIAS_WALMART` - Token para transferencias de Walmart
 
-### Opción 1: Usando el script automatizado
+## 🚀 Endpoints disponibles
 
-1. Configura las variables de entorno en el archivo `config.example`
-2. Ejecuta el script de despliegue:
-```bash
-./deploy.sh
+### Health Check
+**GET** `/health`
+
+Verifica que el servicio esté funcionando.
+
+**Respuesta:**
+```json
+{
+  "status": "ok"
+}
 ```
 
-### Opción 2: Usando Google Cloud Console
+---
 
-1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Navega a Cloud Run
-3. Haz clic en "Crear servicio"
-4. Configura:
-   - **Nombre**: `carga-rotacion`
-   - **Región**: `us-east1`
-   - **Autenticación**: Permitir tráfico no autenticado
-5. En "Código fuente":
-   - Selecciona "Repositorio de código fuente"
-   - Conecta tu repositorio de GitHub
-   - Selecciona la rama y directorio
-6. En "Variables de entorno":
-   - Agrega todas las variables requeridas
-7. Haz clic en "Crear"
+### SubcontrataLey Walmart
 
-### Opción 3: Usando gcloud CLI
+#### 1. Firmas
+**GET** `/subcontrataley/walmart/firmas`
+
+Obtiene datos de documentos firmados del mes anterior.
+
+**Respuesta:**
+```json
+{
+  "ok": true,
+  "periodo": {
+    "desde": "2025-09-01T00:00:00",
+    "hasta": "2025-09-30T23:59:59"
+  },
+  "total_registros": 150,
+  "data": [...]
+}
+```
+
+#### 2. Carpeta de Documentos
+**GET** `/subcontrataley/walmart/carpeta`
+
+Obtiene datos normalizados de documentos de carpeta del mes anterior.
+
+#### 3. Asistencia
+**GET** `/subcontrataley/walmart/asistencia`
+
+Obtiene datos de asistencia de empleados con FaceID enrolado.
+
+#### 4. Liquidaciones
+**GET** `/subcontrataley/walmart/liquidaciones`
+
+Obtiene datos de liquidaciones por instalación del mes anterior.
+
+#### 5. Transferencias
+**GET** `/subcontrataley/walmart/transferencias`
+
+Obtiene datos de transferencias bancarias.
+
+---
+
+### Dirección del Trabajo
+
+#### Altas
+**GET** `/dt/altas`
+
+Procesa y retorna datos de altas de empleados para la Dirección del Trabajo.
+
+**Respuesta:**
+```json
+{
+  "ok": true,
+  "sample": "...",
+  "data": [
+    {
+      "NOMBRE_EMPRESA": "WORLDWIDE FACILITY SECURITY S.A.",
+      "RUT_EMPRESA": "76195703-1",
+      "RUT_TRABAJADOR": "12345678-9",
+      "NOMBRES": "Juan",
+      "APELLIDOS": "Pérez González",
+      ...
+    }
+  ]
+}
+```
+
+## 📚 Documentación automática
+
+Una vez desplegado, puedes acceder a la documentación interactiva:
+
+- **Swagger UI**: https://recursiva-data-altas-dt-596669043554.us-east1.run.app/docs
+- **ReDoc**: https://recursiva-data-altas-dt-596669043554.us-east1.run.app/redoc
+
+## 🐳 Despliegue a Cloud Run
+
+### Opción 1: Usando gcloud CLI
 
 ```bash
+# Autenticarse
+gcloud auth login
+
 # Construir y desplegar
-gcloud builds submit --tag gcr.io/pruebas-463316/carga-rotacion
-gcloud run deploy carga-rotacion \
-  --image gcr.io/pruebas-463316/carga-rotacion \
+gcloud builds submit --tag gcr.io/TU_PROJECT_ID/recursiva-api
+
+gcloud run deploy recursiva-data-altas-dt \
+  --image gcr.io/TU_PROJECT_ID/recursiva-api \
   --platform managed \
   --region us-east1 \
   --allow-unauthenticated \
   --memory 2Gi \
   --cpu 2 \
   --timeout 3600 \
-  --set-env-vars API_LOCAL_URL="tu-api-url",PROJECT_ID="pruebas-463316",DATASET_ID="tu-dataset",TABLE_ID="tu-tabla",TOKEN_CR="tu-token"
+  --set-env-vars API_LOCAL_URL="https://cl.controlroll.com/ww01/ServiceUrl.aspx",\
+TOKEN_ALTAS="tu-token",\
+TOKEN_ALTAS2="tu-token",\
+TOKEN_DOC_FIRMA_WALMART="tu-token",\
+TOKEN_DOC_CARPETA_WALMART="tu-token",\
+TOKEN_ASISTENCIA_WALMART="tu-token",\
+TOKEN_TRANSFERENCIAS_WALMART="tu-token"
 ```
 
-## Uso
+### Opción 2: Usando Google Cloud Console
 
-Una vez desplegada, la función estará disponible en:
-```
-https://REGION-PROJECT_ID.cloudfunctions.net/rotacion-sync
-```
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Navega a **Cloud Run**
+3. Haz clic en **"Crear servicio"**
+4. Configura:
+   - **Nombre**: `recursiva-data-altas-dt`
+   - **Región**: `us-east1`
+   - **Autenticación**: Permitir tráfico no autenticado
+5. En **"Código fuente"**:
+   - Conecta tu repositorio de GitHub
+   - Selecciona la rama `main`
+6. En **"Variables de entorno"**:
+   - Agrega todas las variables listadas arriba
+7. En **"Capacidad"**:
+   - Memoria: 2 GiB
+   - CPU: 2
+   - Timeout: 3600 segundos
+8. Haz clic en **"Crear"**
 
-### Ejemplo de llamada HTTP
+## 💻 Desarrollo local
+
+### Requisitos
+
+- Python 3.11+
+- pip
+
+### Instalación
 
 ```bash
-curl -X POST https://REGION-PROJECT_ID.cloudfunctions.net/rotacion-sync
+# Clonar repositorio
+git clone https://github.com/wwdiegovarela/Recursiva_Altas_DT.git
+cd Recursiva_Altas_DT
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Configurar variables de entorno
+export API_LOCAL_URL="https://cl.controlroll.com/ww01/ServiceUrl.aspx"
+export TOKEN_ALTAS="tu-token"
+export TOKEN_ALTAS2="tu-token"
+export TOKEN_DOC_FIRMA_WALMART="tu-token"
+export TOKEN_DOC_CARPETA_WALMART="tu-token"
+export TOKEN_ASISTENCIA_WALMART="tu-token"
+export TOKEN_TRANSFERENCIAS_WALMART="tu-token"
+
+# Iniciar servidor
+uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
-### Respuesta exitosa
+En Windows PowerShell:
+```powershell
+$env:API_LOCAL_URL="https://cl.controlroll.com/ww01/ServiceUrl.aspx"
+$env:TOKEN_ALTAS="tu-token"
+# ... etc
 
-```json
-{
-  "success": true,
-  "message": "Data procesada exitosamente",
-  "records_processed": 1234
-}
+uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
-### Respuesta de error
+Accede a:
+- API: http://localhost:8080
+- Docs: http://localhost:8080/docs
 
-```json
-{
-  "success": false,
-  "error": "Descripción del error",
-  "message": "Error al procesar la sincronización"
-}
-```
+## 🧪 Pruebas con Postman
 
-## Permisos requeridos
+Se incluye una colección de Postman para facilitar las pruebas:
 
-Asegúrate de que la Cloud Function tenga los siguientes permisos de IAM:
+1. Importa `Recursiva_API.postman_collection.json` en Postman
+2. (Opcional) Importa `Recursiva_API.postman_environment.json`
+3. Los endpoints ya están configurados con la URL de producción
 
-- `bigquery.dataEditor` - Para escribir datos en BigQuery
-- `bigquery.jobUser` - Para ejecutar trabajos de BigQuery
+## 📊 Monitoreo
 
-## Monitoreo
+Para monitorear el servicio en producción:
 
-Puedes monitorear la función en:
-- Cloud Functions Console
-- Cloud Logging
-- Cloud Monitoring
+1. Accede a [Google Cloud Console](https://console.cloud.google.com/)
+2. Navega a **Cloud Run**
+3. Selecciona el servicio `recursiva-data-altas-dt`
+4. Revisa:
+   - **Métricas** - Latencia, requests, errores
+   - **Logs** - Registros detallados de ejecución
+   - **Revisiones** - Historial de deployments
 
-## Estructura de datos
+## 🔍 Funciones de utilidad
 
-La función procesa datos de empleados y genera una tabla con las siguientes columnas principales:
+El código incluye varias funciones de utilidad:
 
-- `period` - Período (YYYY-MM)
-- `rut` - RUT del empleado
-- `cliente` - Cliente
-- `instalacion` - Instalación
-- `cecos` - Centro de costos
-- `cargo` - Cargo
-- `nombre_completo` - Nombre completo
-- `estado` - Estado del empleado
-- `active_days` - Días activos en el mes
-- `active_ratio` - Ratio de actividad
-- `hire_in_month` - Contratado en el mes
-- `term_in_month` - Terminado en el mes
+- `traducir_mes_en_espanol()` - Traduce nombres de meses
+- `agregar_nombre_subcontrataley_walmart()` - Mapea instalaciones Walmart
+- `intervalo_fechas()` - Calcula fechas del mes anterior
+- `consulta_cr()` - Cliente HTTP para ControlRoll
+- `get_mantenedor()` - Configuración de documentos SubcontrataLey
+
+## ⚠️ Notas importantes
+
+- Los datos se filtran automáticamente por el **mes anterior**
+- Los endpoints pueden tardar varios minutos en responder (timeout: 1 hora)
+- Todos los tokens se configuran en Cloud Run, no en el código
+- Las respuestas incluyen manejo de errores con códigos HTTP apropiados
+
+## 📞 Soporte
+
+Para problemas o consultas:
+- Email: diego.varela@wfsa.cl
+- Revisar logs en Cloud Run para diagnósticos detallados
+
+## 📄 Licencia
+
+© 2025 Worldwide Facility Security S.A.

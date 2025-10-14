@@ -16,8 +16,6 @@ COPY . .
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
 
-# Define environment variable
-ENV PORT=8080
-
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Cloud Run will inject PORT environment variable
+CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
