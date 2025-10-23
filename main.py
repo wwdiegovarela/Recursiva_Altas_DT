@@ -495,7 +495,7 @@ def get_altas():
         # Mapeo binario 0/1 -> "No"/"Si" para campos solicitados
         try:
             _binary_map = {'0': 'No', '1': 'Si', 0: 'No', 1: 'Si'}
-            for _col in ['DECLARACION_DISCAPACIDAD', 'DECLARACION_INVALIDEZ', 'EST']:
+            for _col in ['DECLARACION_DISCAPACIDAD', 'DECLARACION_INVALIDEZ', 'EST', 'SUBCONTRATACION']:
                 if _col in data.columns:
                     data[_col] = data[_col].map(_binary_map).fillna(data[_col])
         except Exception as _e:
