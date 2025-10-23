@@ -9,6 +9,7 @@ import os
 import traceback
 import numpy as np
 from datetime import datetime, timedelta
+from mappings import apply_mappings_to_df, MAPPINGS_ALTAS
 
 app = FastAPI(title="WFSA - Proceso ControlRoll", version="1.0.0")
 
@@ -381,6 +382,11 @@ def get_altas():
 
         data_json = json.loads(data_text)
         data = pd.DataFrame(data_json)
+        # Aplicación de diccionarios justo después de crear el DataFrame
+        try:
+            data = apply_mappings_to_df(data, MAPPINGS_ALTAS, logs)
+        except Exception as map_err:
+            log_print(logs, f"Advertencia al aplicar diccionarios: {type(map_err).__name__}: {str(map_err)}")
 
         # ========= BLOQUE 2: Segunda llamada a la API con TOKEN2 =========
         headers = {
