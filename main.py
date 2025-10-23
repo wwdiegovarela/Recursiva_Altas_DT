@@ -469,10 +469,18 @@ def get_altas():
         data['CAMBIO_DOMICILIO'] ="No"
         data['NOTIFICACION_DISCAPACIDAD']=""
         data['NOTIFICACION_DISCAPACIDAD'].loc[data['DECLARACION_DISCAPACIDAD']=="1"]=data['FECHA_SUSCRPCION']
-
+        
         data['NOTIFICACION_INVALIDEZ']=""
         data['NOTIFICACION_INVALIDEZ'].loc[data['DECLARACION_INVALIDEZ']=="1"]=data['FECHA_SUSCRPCION']
-        data['MONTO_NO_IMPONIBLE'] = data['MONTO_2']+data['MONTO_3']
+        # Suma numérica segura para MONTO_NO_IMPONIBLE
+        try:
+            if 'MONTO_2' in data.columns:
+                data['MONTO_2'] = pd.to_numeric(data['MONTO_2'], errors='coerce')
+            if 'MONTO_3' in data.columns:
+                data['MONTO_3'] = pd.to_numeric(data['MONTO_3'], errors='coerce')
+            data['MONTO_NO_IMPONIBLE'] = data.get('MONTO_2', 0).fillna(0) + data.get('MONTO_3', 0).fillna(0)
+        except Exception as _e:
+            log_print(logs, f"Advertencia al convertir/sumar montos: {type(_e).__name__}: {str(_e)}")
         data['REM_Y_ASIGNACIONES'] ="PAGO MENSUAL POR TRANSFERENCIA, GRATIFICACION ART. 47 DEL CODIGO DEL TRABAJO"
         data['ARTICULO_38'] ="No"
         data['ARTICULO_38'].loc[data['CARGO_TRABAJADORES'].str.lower().str.contains('guardia|operador cctv|recepcionista|jefe de grupo')]="Si"
@@ -482,6 +490,16 @@ def get_altas():
 
 
         data['OTRAS_ESTIPULACIONES'] =""
+
+
+        # Mapeo binario 0/1 -> "No"/"Si" para campos solicitados
+        try:
+            _binary_map = {'0': 'No', '1': 'Si', 0: 'No', 1: 'Si'}
+            for _col in ['DECLARACION_DISCAPACIDAD', 'DECLARACION_INVALIDEZ', 'EST']:
+                if _col in data.columns:
+                    data[_col] = data[_col].map(_binary_map).fillna(data[_col])
+        except Exception as _e:
+            log_print(logs, f"Advertencia al mapear binarios: {type(_e).__name__}: {str(_e)}")
 
 
         # Reorden de columnas (exacto al original)
