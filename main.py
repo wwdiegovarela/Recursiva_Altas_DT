@@ -487,7 +487,7 @@ def get_altas():
 
         data['DISTRIBUCION_JORNADA'] ="Lunes,Martes,Miercoles,Jueves,Viernes"
         data['DISTRIBUCION_JORNADA'].loc[data['CARGO_TRABAJADORES'].str.lower().str.contains('guardia|operador cctv|recepcionista|jefe de grupo')]="Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo"
-
+        data['DURACION_JORNADA'] = 44
 
         data['OTRAS_ESTIPULACIONES'] =""
 
