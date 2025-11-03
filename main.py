@@ -543,7 +543,7 @@ def get_altas():
 
 class ResultadoCarga(BaseModel):
     """Modelo para un resultado de carga individual"""
-    id: str
+    fecha_contrato: str
     rut: str
     resultado: str
     detalle: str
@@ -608,7 +608,7 @@ def post_resultado_altas(request: ResultadoCargasRequest):
     Carga resultados de altas a BigQuery.
     
     Recibe un array de objetos con los siguientes campos:
-    - id: Identificador único del registro
+    - fecha_contrato: Fecha del contrato (formato: YYYY-MM-DD)
     - rut: RUT del trabajador
     - resultado: Resultado de la operación (ej: "Exitoso", "Error", etc.)
     - detalle: Detalle o mensaje adicional

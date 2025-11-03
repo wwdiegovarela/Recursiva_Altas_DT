@@ -131,13 +131,13 @@ Carga resultados de altas a BigQuery en la tabla `worldwide-470917.cargas_recurs
 {
   "datos": [
     {
-      "id": "123",
+      "fecha_contrato": "2025-01-15",
       "rut": "12345678-9",
       "resultado": "Exitoso",
       "detalle": "Alta procesada correctamente"
     },
     {
-      "id": "124",
+      "fecha_contrato": "2025-01-16",
       "rut": "98765432-1",
       "resultado": "Error",
       "detalle": "RUT inválido"
@@ -160,7 +160,7 @@ Carga resultados de altas a BigQuery en la tabla `worldwide-470917.cargas_recurs
 ```
 
 **Campos del modelo:**
-- `id` (string): Identificador único del registro
+- `fecha_contrato` (string): Fecha del contrato (formato: YYYY-MM-DD)
 - `rut` (string): RUT del trabajador
 - `resultado` (string): Resultado de la operación (ej: "Exitoso", "Error", etc.)
 - `detalle` (string): Detalle o mensaje adicional
