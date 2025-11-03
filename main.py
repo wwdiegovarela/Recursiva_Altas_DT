@@ -559,6 +559,22 @@ def cargar_a_bigquery(datos: List[dict], tabla: str = "worldwide-470917.cargas_r
     """
     Carga datos a BigQuery usando el service account.
     
+    La tabla debe estar particionada por el campo fecha_contrato (tipo DATE).
+    Para crear la tabla particionada, ejecutar en BigQuery:
+    
+    CREATE TABLE `worldwide-470917.cargas_recursiva.resultado_cargas_altas` (
+      id STRING,
+      rut STRING,
+      fecha_contrato DATE,
+      estado STRING,
+      detalle STRING,
+      fecha_carga TIMESTAMP
+    )
+    PARTITION BY fecha_contrato
+    OPTIONS(
+      description="Tabla de resultados de cargas de altas, particionada por fecha_contrato"
+    );
+    
     Args:
         datos: Lista de diccionarios con los datos a cargar
         tabla: Nombre completo de la tabla en formato proyecto.dataset.tabla
@@ -581,8 +597,36 @@ def cargar_a_bigquery(datos: List[dict], tabla: str = "worldwide-470917.cargas_r
         # Convertir datos a DataFrame
         df = pd.DataFrame(datos)
         
-        # Generar campo id como concatenación de rut y fecha_contrato
-        df['id'] = df['rut'].astype(str) + '_' + df['fecha_contrato'].astype(str)
+        # Validar formato de fecha_contrato antes de procesar
+        fecha_original = df['fecha_contrato'].copy()
+        df['fecha_contrato_date'] = pd.to_datetime(df['fecha_contrato'], format='%Y-%m-%d', errors='coerce')
+        
+        # Detectar fechas inválidas
+        fechas_invalidas = df['fecha_contrato_date'].isna() & df['fecha_contrato'].notna()
+        if fechas_invalidas.any():
+            indices_invalidos = df[fechas_invalidas].index
+            fechas_invalidas_list = fecha_original.iloc[indices_invalidos].tolist()
+            raise ValueError(
+                f"El campo fecha_contrato no tiene el formato correcto. "
+                f"Formato esperado: YYYY-MM-DD (ej: 2025-01-15). "
+                f"Valores inválidos encontrados: {fechas_invalidas_list}"
+            )
+        
+        # Verificar que no haya fechas nulas
+        if df['fecha_contrato'].isna().any():
+            raise ValueError(
+                "El campo fecha_contrato no puede estar vacío. "
+                "Formato requerido: YYYY-MM-DD (ej: 2025-01-15)"
+            )
+        
+        # Convertir a tipo DATE para compatibilidad con partición de BigQuery
+        df['fecha_contrato'] = df['fecha_contrato_date'].dt.date
+        
+        # Generar campo id como concatenación de rut y fecha_contrato (usando valor string original)
+        df['id'] = df['rut'].astype(str) + '_' + fecha_original.astype(str)
+        
+        # Eliminar columna temporal
+        df = df.drop(columns=['fecha_contrato_date'])
         
         # Agregar timestamp de carga
         df['fecha_carga'] = datetime.now()

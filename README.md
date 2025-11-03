@@ -172,6 +172,26 @@ Carga resultados de altas a BigQuery en la tabla `worldwide-470917.cargas_recurs
 **Orden de columnas en BigQuery:**
 `id`, `rut`, `fecha_contrato`, `estado`, `detalle`, `fecha_carga`
 
+**Nota sobre partición:**
+La tabla debe estar particionada por el campo `fecha_contrato` (tipo DATE) para optimizar las consultas. El campo `fecha_contrato` se convierte automáticamente a tipo DATE antes de cargarse.
+
+Para crear la tabla particionada en BigQuery, ejecutar:
+
+```sql
+CREATE TABLE `worldwide-470917.cargas_recursiva.resultado_cargas_altas` (
+  id STRING,
+  rut STRING,
+  fecha_contrato DATE,
+  estado STRING,
+  detalle STRING,
+  fecha_carga TIMESTAMP
+)
+PARTITION BY fecha_contrato
+OPTIONS(
+  description="Tabla de resultados de cargas de altas, particionada por fecha_contrato"
+);
+```
+
 ## 📚 Documentación automática
 
 Una vez desplegado, puedes acceder a la documentación interactiva:
