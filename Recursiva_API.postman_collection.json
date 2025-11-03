@@ -250,7 +250,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"datos\": [\n    {\n      \"fecha_contrato\": \"2025-01-15\",\n      \"rut\": \"12345678-9\",\n      \"resultado\": \"Exitoso\",\n      \"detalle\": \"Alta procesada correctamente\"\n    },\n    {\n      \"fecha_contrato\": \"2025-01-16\",\n      \"rut\": \"98765432-1\",\n      \"resultado\": \"Error\",\n      \"detalle\": \"RUT inválido\"\n    }\n  ]\n}",
+							"raw": "{\n  \"datos\": [\n    {\n      \"fecha_contrato\": \"2025-01-15\",\n      \"rut\": \"12345678-9\",\n      \"estado\": \"Exitoso\",\n      \"detalle\": \"Alta procesada correctamente\"\n    },\n    {\n      \"fecha_contrato\": \"2025-01-16\",\n      \"rut\": \"98765432-1\",\n      \"estado\": \"Error\",\n      \"detalle\": \"RUT inválido\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"

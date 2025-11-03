@@ -545,7 +545,7 @@ class ResultadoCarga(BaseModel):
     """Modelo para un resultado de carga individual"""
     fecha_contrato: str
     rut: str
-    resultado: str
+    estado: str
     detalle: str
 
 class ResultadoCargasRequest(BaseModel):
@@ -581,8 +581,14 @@ def cargar_a_bigquery(datos: List[dict], tabla: str = "worldwide-470917.cargas_r
         # Convertir datos a DataFrame
         df = pd.DataFrame(datos)
         
+        # Generar campo id como concatenación de rut y fecha_contrato
+        df['id'] = df['rut'].astype(str) + '_' + df['fecha_contrato'].astype(str)
+        
         # Agregar timestamp de carga
         df['fecha_carga'] = datetime.now()
+        
+        # Reordenar columnas: id, rut, fecha_contrato, estado, detalle, fecha_carga
+        df = df[['id', 'rut', 'fecha_contrato', 'estado', 'detalle', 'fecha_carga']]
         
         # Cargar datos a BigQuery
         job_config = bigquery.LoadJobConfig(
@@ -610,10 +616,15 @@ def post_resultado_altas(request: ResultadoCargasRequest):
     Recibe un array de objetos con los siguientes campos:
     - fecha_contrato: Fecha del contrato (formato: YYYY-MM-DD)
     - rut: RUT del trabajador
-    - resultado: Resultado de la operación (ej: "Exitoso", "Error", etc.)
+    - estado: Estado de la operación (ej: "Exitoso", "Error", etc.)
     - detalle: Detalle o mensaje adicional
     
+    El endpoint genera automáticamente:
+    - id: Concatenación de rut y fecha_contrato (formato: rut_fecha_contrato)
+    - fecha_carga: Timestamp de cuando se cargó el registro
+    
     Los datos se cargan en la tabla: worldwide-470917.cargas_recursiva.resultado_cargas_altas
+    con el siguiente orden: id, rut, fecha_contrato, estado, detalle, fecha_carga
     """
     try:
         # Validar que hay datos

@@ -133,13 +133,13 @@ Carga resultados de altas a BigQuery en la tabla `worldwide-470917.cargas_recurs
     {
       "fecha_contrato": "2025-01-15",
       "rut": "12345678-9",
-      "resultado": "Exitoso",
+      "estado": "Exitoso",
       "detalle": "Alta procesada correctamente"
     },
     {
       "fecha_contrato": "2025-01-16",
       "rut": "98765432-1",
-      "resultado": "Error",
+      "estado": "Error",
       "detalle": "RUT inválido"
     }
   ]
@@ -159,13 +159,18 @@ Carga resultados de altas a BigQuery en la tabla `worldwide-470917.cargas_recurs
 }
 ```
 
-**Campos del modelo:**
+**Campos del modelo (entrada):**
 - `fecha_contrato` (string): Fecha del contrato (formato: YYYY-MM-DD)
 - `rut` (string): RUT del trabajador
-- `resultado` (string): Resultado de la operación (ej: "Exitoso", "Error", etc.)
+- `estado` (string): Estado de la operación (ej: "Exitoso", "Error", etc.)
 - `detalle` (string): Detalle o mensaje adicional
 
-**Nota:** El endpoint agrega automáticamente un campo `fecha_carga` con la fecha y hora de la carga.
+**Campos generados automáticamente:**
+- `id` (string): Concatenación de `rut` y `fecha_contrato` (formato: `rut_fecha_contrato`)
+- `fecha_carga` (datetime): Timestamp de cuando se cargó el registro
+
+**Orden de columnas en BigQuery:**
+`id`, `rut`, `fecha_contrato`, `estado`, `detalle`, `fecha_carga`
 
 ## 📚 Documentación automática
 
