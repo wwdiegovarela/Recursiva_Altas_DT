@@ -97,7 +97,9 @@ Obtiene datos de transferencias bancarias.
 ### Dirección del Trabajo
 
 #### Altas
-**GET** `/dt/altas`
+
+##### 1. Cargar datos de altas
+**GET** `/dt/altas/cargar`
 
 Procesa y retorna datos de altas de empleados para la Dirección del Trabajo.
 
@@ -118,6 +120,52 @@ Procesa y retorna datos de altas de empleados para la Dirección del Trabajo.
   ]
 }
 ```
+
+##### 2. Guardar resultados de carga
+**POST** `/dt/altas/resultado`
+
+Carga resultados de altas a BigQuery en la tabla `worldwide-470917.cargas_recursiva.resultado_cargas_altas`.
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "datos": [
+    {
+      "id": "123",
+      "rut": "12345678-9",
+      "resultado": "Exitoso",
+      "detalle": "Alta procesada correctamente"
+    },
+    {
+      "id": "124",
+      "rut": "98765432-1",
+      "resultado": "Error",
+      "detalle": "RUT inválido"
+    }
+  ]
+}
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "ok": true,
+  "mensaje": "Datos cargados exitosamente a BigQuery",
+  "resultado": {
+    "filas_insertadas": 2,
+    "job_id": "bqjob_r123...",
+    "tabla": "worldwide-470917.cargas_recursiva.resultado_cargas_altas"
+  }
+}
+```
+
+**Campos del modelo:**
+- `id` (string): Identificador único del registro
+- `rut` (string): RUT del trabajador
+- `resultado` (string): Resultado de la operación (ej: "Exitoso", "Error", etc.)
+- `detalle` (string): Detalle o mensaje adicional
+
+**Nota:** El endpoint agrega automáticamente un campo `fecha_carga` con la fecha y hora de la carga.
 
 ## 📚 Documentación automática
 

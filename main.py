@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from typing import List
 import requests
 import pandas as pd
 import json
@@ -9,6 +11,7 @@ import os
 import traceback
 import numpy as np
 from datetime import datetime, timedelta
+from google.cloud import bigquery
 from mappings import apply_mappings_to_df, MAPPINGS_ALTAS
 
 app = FastAPI(title="WFSA - Proceso ControlRoll", version="1.0.0")
@@ -318,7 +321,7 @@ def get_transferencias():
             content={"ok": False, "error": f"{type(e).__name__}: {str(e)}", "traceback": traceback.format_exc()}
         )
 
-@app.get("/dt/altas")
+@app.get("/dt/altas/cargar")
 def get_altas():
     """
     Ejecuta el flujo original sin alterar el orden de operaciones ni la lógica.
@@ -535,6 +538,113 @@ def get_altas():
         log_print(logs, f"❌ Stack trace: {traceback.format_exc()}")
         return JSONResponse(status_code=500, content={"ok": False, "error": err, "logs": logs})
 
+
+# ========== MODELOS PYDANTIC ==========
+
+class ResultadoCarga(BaseModel):
+    """Modelo para un resultado de carga individual"""
+    id: str
+    rut: str
+    resultado: str
+    detalle: str
+
+class ResultadoCargasRequest(BaseModel):
+    """Modelo para la solicitud de cargas de resultados"""
+    datos: List[ResultadoCarga]
+
+
+# ========== FUNCIONES BIGQUERY ==========
+
+def cargar_a_bigquery(datos: List[dict], tabla: str = "worldwide-470917.cargas_recursiva.resultado_cargas_altas"):
+    """
+    Carga datos a BigQuery usando el service account.
+    
+    Args:
+        datos: Lista de diccionarios con los datos a cargar
+        tabla: Nombre completo de la tabla en formato proyecto.dataset.tabla
+    
+    Returns:
+        dict: Resultado de la operación con número de filas insertadas
+    """
+    try:
+        # Inicializar cliente de BigQuery
+        # En Cloud Run, usa las credenciales del servicio automáticamente
+        # En local, usa el archivo service-account.json si está disponible
+        if os.path.exists("service-account.json"):
+            client = bigquery.Client.from_service_account_json(
+                "service-account.json"
+            )
+        else:
+            # En Cloud Run, usa las credenciales del servicio automáticamente
+            client = bigquery.Client(project="worldwide-470917")
+        
+        # Convertir datos a DataFrame
+        df = pd.DataFrame(datos)
+        
+        # Agregar timestamp de carga
+        df['fecha_carga'] = datetime.now()
+        
+        # Cargar datos a BigQuery
+        job_config = bigquery.LoadJobConfig(
+            write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+            autodetect=True  # Detecta automáticamente el esquema
+        )
+        
+        job = client.load_table_from_dataframe(df, tabla, job_config=job_config)
+        job.result()  # Espera a que termine el job
+        
+        return {
+            "filas_insertadas": len(datos),
+            "job_id": job.job_id,
+            "tabla": tabla
+        }
+    except Exception as e:
+        raise Exception(f"Error al cargar datos a BigQuery: {type(e).__name__}: {str(e)}")
+
+
+@app.post("/dt/altas/resultado")
+def post_resultado_altas(request: ResultadoCargasRequest):
+    """
+    Carga resultados de altas a BigQuery.
+    
+    Recibe un array de objetos con los siguientes campos:
+    - id: Identificador único del registro
+    - rut: RUT del trabajador
+    - resultado: Resultado de la operación (ej: "Exitoso", "Error", etc.)
+    - detalle: Detalle o mensaje adicional
+    
+    Los datos se cargan en la tabla: worldwide-470917.cargas_recursiva.resultado_cargas_altas
+    """
+    try:
+        # Validar que hay datos
+        if not request.datos or len(request.datos) == 0:
+            return JSONResponse(
+                status_code=400,
+                content={"ok": False, "error": "La lista de datos está vacía"}
+            )
+        
+        # Convertir los modelos Pydantic a diccionarios
+        datos_dict = [item.dict() for item in request.datos]
+        
+        # Cargar a BigQuery
+        resultado = cargar_a_bigquery(datos_dict)
+        
+        return {
+            "ok": True,
+            "mensaje": "Datos cargados exitosamente a BigQuery",
+            "resultado": resultado
+        }
+        
+    except Exception as e:
+        err = f"{type(e).__name__}: {str(e)}"
+        return JSONResponse(
+            status_code=500,
+            content={
+                "ok": False,
+                "error": err,
+                "traceback": traceback.format_exc()
+            }
+        )
 
 
 # Ejecutar con: uvicorn main:app --reload --host 0.0.0.0 --port 8000
