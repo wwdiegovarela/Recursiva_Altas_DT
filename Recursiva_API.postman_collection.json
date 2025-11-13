@@ -28,13 +28,10 @@
 					}
 				],
 				"url": {
-					"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/health",
+					"raw": "{{base_url}}/health",
 					"protocol": "https",
 					"host": [
-						"recursiva-data-altas-dt-596669043554",
-						"us-east1",
-						"run",
-						"app"
+						"{{base_url}}"
 					],
 					"path": [
 						"health"
@@ -45,157 +42,138 @@
 			"response": []
 		},
 		{
-			"name": "SubcontrataLey Walmart",
+			"name": "Certificadoras",
 			"item": [
 				{
-					"name": "Firmas",
+					"name": "POST /certificadoras/resultados/clientes",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{bearer_token}}",
-								"type": "text"
-							}
+							{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
 						],
-						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/subcontrataley/walmart/firmas",
-							"protocol": "https",
-							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
-							],
-							"path": [
-								"subcontrataley",
-								"walmart",
-								"firmas"
-							]
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"datos\": [\n    {\n      \"cliente\": \"walmart\",\n      \"dominio\": \"subcontrataley\",\n      \"endpoint\": \"kpr\",\n      \"rut\": \"12345678-9\",\n      \"instalacion\": \"Sucursal X\",\n      \"cecos\": \"CC123\",\n      \"tipo_documento\": \"KIT PREVENCION DE RIESGOS\",\n      \"nombre_documento\": \"KIT PREVENCION DE RIESGOS\",\n      \"fecha_referencia\": \"2025-01-31T10:00:00Z\",\n      \"nombre_archivo\": null,\n      \"estado\": \"Exitoso\",\n      \"detalle\": \"Cargado\"\n    }\n  ]\n}",
+							"options": { "raw": { "language": "json" } }
 						},
-						"description": "Obtiene datos de documentos firmados del mes anterior"
+						"url": {
+							"raw": "{{base_url}}/certificadoras/resultados/clientes",
+							"protocol": "https",
+							"host": [ "{{base_url}}" ],
+							"path": [ "certificadoras", "resultados", "clientes" ]
+						},
+						"description": "Carga resultados consolidados bajo /certificadoras hacia `resultado_cargas_certificadoras_clientes`"
 					},
 					"response": []
 				},
 				{
-					"name": "Carpeta",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{bearer_token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/subcontrataley/walmart/carpeta",
-							"protocol": "https",
-							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
-							],
-							"path": [
-								"subcontrataley",
-								"walmart",
-								"carpeta"
-							]
-						},
-						"description": "Obtiene datos normalizados de documentos de carpeta del mes anterior"
-					},
-					"response": []
+					"name": "Walmart (Certificadoras)",
+					"item": [
+						{ "name": "KPR", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/kpr", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","kpr"] } }, "response": [] },
+						{ "name": "Contrato", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/contrato", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","contrato"] } }, "response": [] },
+						{ "name": "Finiquito", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/finiquito", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","finiquito"] } }, "response": [] },
+						{ "name": "EPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/epp", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","epp"] } }, "response": [] },
+						{ "name": "OS10", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/os10", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","os10"] } }, "response": [] },
+						{ "name": "Antecedentes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/antecedentes", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","antecedentes"] } }, "response": [] },
+						{ "name": "Cédula", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/cedula", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","cedula"] } }, "response": [] },
+						{ "name": "CDRV", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/cdrv", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","cdrv"] } }, "response": [] },
+						{ "name": "CUEPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/cuepp", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","cuepp"] } }, "response": [] },
+						{ "name": "Anexo Traslado", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/anexotraslado", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","anexotraslado"] } }, "response": [] },
+						{ "name": "Asistencia", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/asistencia", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","asistencia"] } }, "response": [] },
+						{ "name": "Liquidaciones", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/liquidaciones", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","liquidaciones"] } }, "response": [] },
+						{ "name": "Transferencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/walmart/transferencias", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","walmart","transferencias"] } }, "response": [] }
+					]
 				},
 				{
-					"name": "Asistencia",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{bearer_token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/subcontrataley/walmart/asistencia",
-							"protocol": "https",
-							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
-							],
-							"path": [
-								"subcontrataley",
-								"walmart",
-								"asistencia"
-							]
-						},
-						"description": "Obtiene datos de asistencia de empleados con FaceID enrolado"
-					},
-					"response": []
+					"name": "Telefonica (Certificadoras)",
+					"item": [
+						{ "name": "KPR", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/kpr", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","kpr"] } }, "response": [] },
+						{ "name": "Contrato", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/contrato", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","contrato"] } }, "response": [] },
+						{ "name": "Finiquito", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/finiquito", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","finiquito"] } }, "response": [] },
+						{ "name": "EPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/epp", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","epp"] } }, "response": [] },
+						{ "name": "OS10", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/os10", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","os10"] } }, "response": [] },
+						{ "name": "Antecedentes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/antecedentes", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","antecedentes"] } }, "response": [] },
+						{ "name": "Cédula", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/cedula", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","cedula"] } }, "response": [] },
+						{ "name": "CDRV", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/cdrv", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","cdrv"] } }, "response": [] },
+						{ "name": "CUEPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/cuepp", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","cuepp"] } }, "response": [] },
+						{ "name": "Anexo Traslado", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/anexotraslado", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","anexotraslado"] } }, "response": [] },
+						{ "name": "Asistencia", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/asistencia", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","asistencia"] } }, "response": [] },
+						{ "name": "Liquidaciones", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/liquidaciones", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","liquidaciones"] } }, "response": [] },
+						{ "name": "Transferencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/subcontrataley/telefonica/transferencias", "host": ["{{base_url}}"], "path": ["certificadoras","subcontrataley","telefonica","transferencias"] } }, "response": [] }
+					]
 				},
 				{
-					"name": "Liquidaciones",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{bearer_token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/subcontrataley/walmart/liquidaciones",
-							"protocol": "https",
-							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
-							],
-							"path": [
-								"subcontrataley",
-								"walmart",
-								"liquidaciones"
-							]
-						},
-						"description": "Obtiene datos de liquidaciones por instalación del mes anterior"
-					},
-					"response": []
+					"name": "SantoTomás (Certificadoras)",
+					"item": [
+						{ "name": "KPR", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/kpr", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","kpr"] } }, "response": [] },
+						{ "name": "Contrato", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/contrato", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","contrato"] } }, "response": [] },
+						{ "name": "Finiquito", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/finiquito", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","finiquito"] } }, "response": [] },
+						{ "name": "EPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/epp", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","epp"] } }, "response": [] },
+						{ "name": "OS10", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/os10", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","os10"] } }, "response": [] },
+						{ "name": "Antecedentes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/antecedentes", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","antecedentes"] } }, "response": [] },
+						{ "name": "Cédula", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/cedula", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","cedula"] } }, "response": [] },
+						{ "name": "CDRV", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/cdrv", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","cdrv"] } }, "response": [] },
+						{ "name": "CUEPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/cuepp", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","cuepp"] } }, "response": [] },
+						{ "name": "Anexo Traslado", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/anexotraslado", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","anexotraslado"] } }, "response": [] },
+						{ "name": "Asistencia", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/asistencia", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","asistencia"] } }, "response": [] },
+						{ "name": "Liquidaciones", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/liquidaciones", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","liquidaciones"] } }, "response": [] },
+						{ "name": "Transferencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ssoma/santotomas/transferencias", "host": ["{{base_url}}"], "path": ["certificadoras","ssoma","santotomas","transferencias"] } }, "response": [] }
+					]
 				},
 				{
-					"name": "Transferencias",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{bearer_token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/subcontrataley/walmart/transferencias",
-							"protocol": "https",
-							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
-							],
-							"path": [
-								"subcontrataley",
-								"walmart",
-								"transferencias"
-							]
-						},
-						"description": "Obtiene datos de transferencias bancarias"
-					},
-					"response": []
+					"name": "Indumotora (Certificadoras)",
+					"item": [
+						{ "name": "KPR", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/kpr", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","kpr"] } }, "response": [] },
+						{ "name": "Contrato", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/contrato", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","contrato"] } }, "response": [] },
+						{ "name": "Finiquito", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/finiquito", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","finiquito"] } }, "response": [] },
+						{ "name": "EPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/epp", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","epp"] } }, "response": [] },
+						{ "name": "OS10", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/os10", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","os10"] } }, "response": [] },
+						{ "name": "Antecedentes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/antecedentes", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","antecedentes"] } }, "response": [] },
+						{ "name": "Cédula", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/cedula", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","cedula"] } }, "response": [] },
+						{ "name": "CDRV", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/cdrv", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","cdrv"] } }, "response": [] },
+						{ "name": "CUEPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/cuepp", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","cuepp"] } }, "response": [] },
+						{ "name": "Anexo Traslado", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/anexotraslado", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","anexotraslado"] } }, "response": [] },
+						{ "name": "Asistencia", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/asistencia", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","asistencia"] } }, "response": [] },
+						{ "name": "Liquidaciones", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/liquidaciones", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","liquidaciones"] } }, "response": [] },
+						{ "name": "Transferencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/ariba/indumotora/transferencias", "host": ["{{base_url}}"], "path": ["certificadoras","ariba","indumotora","transferencias"] } }, "response": [] }
+					]
+				},
+				{
+					"name": "Unimarc (Certificadoras)",
+					"item": [
+						{ "name": "KPR", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/kpr", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","kpr"] } }, "response": [] },
+						{ "name": "Contrato", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/contrato", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","contrato"] } }, "response": [] },
+						{ "name": "Finiquito", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/finiquito", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","finiquito"] } }, "response": [] },
+						{ "name": "EPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/epp", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","epp"] } }, "response": [] },
+						{ "name": "OS10", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/os10", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","os10"] } }, "response": [] },
+						{ "name": "Antecedentes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/antecedentes", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","antecedentes"] } }, "response": [] },
+						{ "name": "Cédula", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/cedula", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","cedula"] } }, "response": [] },
+						{ "name": "CDRV", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/cdrv", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","cdrv"] } }, "response": [] },
+						{ "name": "CUEPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/cuepp", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","cuepp"] } }, "response": [] },
+						{ "name": "Anexo Traslado", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/anexotraslado", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","anexotraslado"] } }, "response": [] },
+						{ "name": "Asistencia", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/asistencia", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","asistencia"] } }, "response": [] },
+						{ "name": "Liquidaciones", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/liquidaciones", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","liquidaciones"] } }, "response": [] },
+						{ "name": "Transferencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/certilab/unimarc/transferencias", "host": ["{{base_url}}"], "path": ["certificadoras","certilab","unimarc","transferencias"] } }, "response": [] }
+					]
+				},
+				{
+					"name": "SeniorSuites (Certificadoras)",
+					"item": [
+						{ "name": "KPR", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/kpr", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","kpr"] } }, "response": [] },
+						{ "name": "Contrato", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/contrato", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","contrato"] } }, "response": [] },
+						{ "name": "Finiquito", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/finiquito", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","finiquito"] } }, "response": [] },
+						{ "name": "EPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/epp", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","epp"] } }, "response": [] },
+						{ "name": "OS10", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/os10", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","os10"] } }, "response": [] },
+						{ "name": "Antecedentes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/antecedentes", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","antecedentes"] } }, "response": [] },
+						{ "name": "Cédula", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/cedula", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","cedula"] } }, "response": [] },
+						{ "name": "CDRV", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/cdrv", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","cdrv"] } }, "response": [] },
+						{ "name": "CUEPP", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/cuepp", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","cuepp"] } }, "response": [] },
+						{ "name": "Anexo Traslado", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/anexotraslado", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","anexotraslado"] } }, "response": [] },
+						{ "name": "Asistencia", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/asistencia", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","asistencia"] } }, "response": [] },
+						{ "name": "Liquidaciones", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/liquidaciones", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","liquidaciones"] } }, "response": [] },
+						{ "name": "Transferencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text"}], "url": { "raw": "{{base_url}}/certificadoras/oval/seniorsuites/transferencias", "host": ["{{base_url}}"], "path": ["certificadoras","oval","seniorsuites","transferencias"] } }, "response": [] }
+					]
 				}
 			]
 		},
@@ -214,13 +192,10 @@
 							}
 						],
 						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/dt/altas/cargar",
+							"raw": "{{base_url}}/dt/altas/cargar",
 							"protocol": "https",
 							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
+								"{{base_url}}"
 							],
 							"path": [
 								"dt",
@@ -250,7 +225,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"datos\": [\n    {\n      \"fecha_contrato\": \"2025-01-15\",\n      \"rut\": \"12345678-9\",\n      \"estado\": \"Exitoso\",\n      \"detalle\": \"Alta procesada correctamente\"\n    },\n    {\n      \"fecha_contrato\": \"2025-01-16\",\n      \"rut\": \"98765432-1\",\n      \"estado\": \"Error\",\n      \"detalle\": \"RUT inválido\"\n    }\n  ]\n}",
+							"raw": "{\n  \"datos\": [\n    {\n      \"fecha_contrato\": \"2025-01-15\",\n      \"rut\": \"12345678-9\",\n      \"estado\": \"Exitoso\",\n      \"detalle\": \"Alta procesada correctamente\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -258,13 +233,10 @@
 							}
 						},
 						"url": {
-							"raw": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app/dt/altas/resultado",
+							"raw": "{{base_url}}/dt/altas/resultado",
 							"protocol": "https",
 							"host": [
-								"recursiva-data-altas-dt-596669043554",
-								"us-east1",
-								"run",
-								"app"
+								"{{base_url}}"
 							],
 							"path": [
 								"dt",
@@ -275,6 +247,86 @@
 						"description": "Carga resultados de altas a BigQuery en la tabla worldwide-470917.cargas_recursiva.resultado_cargas_altas"
 					},
 					"response": []
+				},
+				{
+					"name": "Bajas - Cargar",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text" }
+						],
+						"url": {
+							"raw": "{{base_url}}/dt/bajas/cargar",
+							"protocol": "https",
+							"host": [ "{{base_url}}" ],
+							"path": [ "dt", "bajas", "cargar" ]
+						},
+						"description": "Extrae bajas y aplica renombres (causal, comentario, fecharetiro, devolucion_afc)"
+					},
+					"response": []
+				},
+				{
+					"name": "Bajas - Resultado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"datos\": [\n    {\n      \"fecha_finiquito\": \"2025-01-15\",\n      \"rut\": \"12345678-9\",\n      \"estado\": \"Exitoso\",\n      \"detalle\": \"Baja procesada\"\n    }\n  ]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/dt/bajas/resultado",
+							"protocol": "https",
+							"host": [ "{{base_url}}" ],
+							"path": [ "dt", "bajas", "resultado" ]
+						},
+						"description": "Carga resultados de bajas a BigQuery (tabla resultado_cargas_bajas)"
+					},
+					"response": []
+				},
+				{
+					"name": "Anexo - Cargar",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text" }
+						],
+						"url": {
+							"raw": "{{base_url}}/dt/anexo/cargar",
+							"protocol": "https",
+							"host": [ "{{base_url}}" ],
+							"path": [ "dt", "anexo", "cargar" ]
+						},
+						"description": "Procesa y retorna datos (misma lógica que Altas)"
+					},
+					"response": []
+				},
+				{
+					"name": "Anexo - Resultado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{bearer_token}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"datos\": [\n    {\n      \"fecha_contrato\": \"2025-01-15\",\n      \"rut\": \"12345678-9\",\n      \"estado\": \"Exitoso\",\n      \"detalle\": \"Anexo procesado\"\n    }\n  ]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/dt/anexo/resultado",
+							"protocol": "https",
+							"host": [ "{{base_url}}" ],
+							"path": [ "dt", "anexo", "resultado" ]
+						},
+						"description": "Carga resultados de anexos a BigQuery (tabla resultado_cargas_anexo)"
+					},
+					"response": []
 				}
 			]
 		}
@@ -282,7 +334,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://recursiva-data-altas-dt-596669043554.us-east1.run.app",
+			"value": "",
 			"type": "string"
 		},
 		{
@@ -292,3 +344,4 @@
 		}
 	]
 }
+
