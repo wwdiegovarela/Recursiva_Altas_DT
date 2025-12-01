@@ -32,17 +32,19 @@ def get_altas():
         # Llamada 2
         data_emp = consulta_cr(TOKEN_ALTAS2)
         data_emp = data_emp.rename(columns={
-            'RUT-DV': 'RUT_TRABAJADOR',
-            'Region1': 'FAENA_REGION',
-            'FECHA NACIMIENTO': 'FECHA_NACIMIENTO',
-            'Nombres': 'NOMBRES'
+            'rut_dv': 'RUT_TRABAJADOR',
+            'region1': 'FAENA_REGION',
+            'fecha_nacimiento': 'FECHA_NACIMIENTO',
+            'nombres': 'NOMBRES'
         })
-        data_emp['APELLIDOS'] = data_emp['Ap. Paterno'] + ' ' + data_emp['Ap. Materno']
+        data_emp['APELLIDOS'] = data_emp['ap_paterno'] + ' ' + data_emp['ap_materno']
 
         # Ajustes y merge
-        for col in ['SEXO', 'FECHA_NACIMIENTO', 'NOMBRES', 'APELLIDOS', 'NACIONALIDAD']:
+        for col in ['sexo', 'fecha_nacimiento', 'nombres', 'apellidos', 'nacionalidad']:
             if col in data.columns:
                 del data[col]
+        data.columns = data.columns.str.upper()
+        data_emp.columns = data_emp.columns.str.upper()
         data = data.merge(data_emp, on=['RUT_TRABAJADOR'], how='left')
         data = data.rename(columns={'EMAIL': 'EMAIL_TRABAJADOR', 'CARGO': 'CARGO_TRABAJADORES', "NRO_DIAS_DIST_JOR": "DIAS_DIST_JOR"})
 
