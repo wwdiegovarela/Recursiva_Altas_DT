@@ -548,7 +548,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "comunas_por_codigo",
         "tabla": MAPPING_COMUNAS_COD_TO_NOMBRE,
-        "campo_objetivo_en_data": "COMUNA",
+        "campo_objetivo_en_data": "comuna",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -556,7 +556,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "comunas_por_codigo",
         "tabla": MAPPING_COMUNAS_COD_TO_NOMBRE,
-        "campo_objetivo_en_data": "COMUNA_CELEBRACION",
+        "campo_objetivo_en_data": "comuna_celebracion",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -564,7 +564,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "comunas_por_codigo",
         "tabla": MAPPING_COMUNAS_COD_TO_NOMBRE,
-        "campo_objetivo_en_data": "FAENA_COMUNA",
+        "campo_objetivo_en_data": "faena_comuna",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -572,7 +572,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "rem_periodo_pago_por_codigo",
         "tabla": MAPPING_REM_PERIODO_PAGO,
-        "campo_objetivo_en_data": "REM_PERIODO_PAGO",
+        "campo_objetivo_en_data": "rem_periodo_pago",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -580,7 +580,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "rem_forma_pago_por_codigo",
         "tabla": MAPPING_REM_FORMA_PAGO,
-        "campo_objetivo_en_data": "REM_FORMA_PAGO",
+        "campo_objetivo_en_data": "rem_forma_pago",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -588,7 +588,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "grat_forma_pago_por_codigo",
         "tabla": MAPPING_GRAT_FORMA_PAGO,
-        "campo_objetivo_en_data": "GRAT_FORMA_PAGO",
+        "campo_objetivo_en_data": "grat_forma_pago",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -596,7 +596,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "rem_afp_por_codigo",
         "tabla": MAPPING_REM_AFP,
-        "campo_objetivo_en_data": "REM_AFP",
+        "campo_objetivo_en_data": "rem_afp",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -604,7 +604,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "rem_anticipo_por_codigo",
         "tabla": MAPPING_REM_ANTICIPO,
-        "campo_objetivo_en_data": "REM_ANTICIPO",
+        "campo_objetivo_en_data": "rem_anticipo",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -612,7 +612,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "rem_salud_por_codigo",
         "tabla": MAPPING_REM_SALUD,
-        "campo_objetivo_en_data": "REM_SALUD",
+        "campo_objetivo_en_data": "rem_salud",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -620,7 +620,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "tipo_jornada_por_codigo",
         "tabla": MAPPING_TIPO_JORNADA,
-        "campo_objetivo_en_data": "TIPO_JORNADA",
+        "campo_objetivo_en_data": "tipo_jornada",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -628,7 +628,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "turnos_por_codigo",
         "tabla": MAPPING_TURNOS,
-        "campo_objetivo_en_data": "TURNOS",
+        "campo_objetivo_en_data": "turnos",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -636,7 +636,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "tipo_contrato_por_codigo",
         "tabla": MAPPING_TIPO_CONTRATO,
-        "campo_objetivo_en_data": "TIPO_CONTRATO",
+        "campo_objetivo_en_data": "tipo_contrato",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -644,7 +644,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "categoria_contrato_por_codigo",
         "tabla": MAPPING_CATEGORIA_CONTRATO,
-        "campo_objetivo_en_data": "CATEGORIA_CONTRATO",
+        "campo_objetivo_en_data": "categoria_contrato",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
@@ -652,7 +652,7 @@ MAPPINGS_ALTAS.extend([
     {
         "nombre_diccionario": "afecto_a_por_codigo",
         "tabla": MAPPING_AFECTO_A,
-        "campo_objetivo_en_data": "AFECTO_A",
+        "campo_objetivo_en_data": "afecto_a",
         "comportamiento_si_no_hay_match": "keep",
         "normalizacion": True,
         "in_place": True,
