@@ -95,15 +95,25 @@ def get_anexo_cargar():
                 contract_date_col = 'FECHA_SUSCRPCION' if 'FECHA_SUSCRPCION' in data.columns else ('FECHA_INI_RELABORAL' if 'FECHA_INI_RELABORAL' in data.columns else None)
                 log_print(logs, f"Columna de fecha usada para ID (anexo): {contract_date_col}")
                 if contract_date_col and 'RUT_TRABAJADOR' in data.columns:
-                    fecha1 = pd.to_datetime(data[contract_date_col], format='%Y-%m-%d', errors='coerce')
-                    fecha2 = pd.to_datetime(data[contract_date_col], format='%d-%m-%Y', errors='coerce')
+                    # Normalización robusta de fecha
+                    raw = data[contract_date_col].astype(str).str.strip()
+                    raw = raw.str.replace('/', '-', regex=False).str.slice(0, 10)
+                    fecha1 = pd.to_datetime(raw, errors='coerce')
+                    fecha2 = pd.to_datetime(raw, errors='coerce', dayfirst=True)
                     fecha_norm = fecha1.fillna(fecha2)
                     try:
                         _nat = int(fecha_norm.isna().sum())
                         log_print(logs, f"Fechas no parseadas (NaT) en {contract_date_col} (anexo): {_nat}")
+                        _ej_raw = raw.head(5).tolist()
+                        log_print(logs, f"Ejemplos fechas origen (anexo): {_ej_raw}")
                     except Exception:
                         pass
                     fecha_str = fecha_norm.dt.strftime('%Y-%m-%d')
+                    try:
+                        _ej_fmt = fecha_str.head(5).tolist()
+                        log_print(logs, f"Ejemplos fechas normalizadas (anexo): {_ej_fmt}")
+                    except Exception:
+                        pass
                     rut_norm = data['RUT_TRABAJADOR'].astype(str).str.replace('.', '', regex=False).str.strip()
                     ids_candidatos = rut_norm + '_' + fecha_str.fillna('')
                     try:

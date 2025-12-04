@@ -70,7 +70,7 @@ def obtener_ids_exitosos(tabla: str = "worldwide-470917.cargas_recursiva.resulta
             ''
           ) AS id
         FROM `{tabla}`
-        WHERE LOWER(TRIM(estado)) IN ('exitoso','terminado','ok')
+        WHERE LOWER(TRIM(estado)) IN ('exitoso','terminado','ok') or (detalle like "%Ya tienes una relación laboral vigente%" and estado='Error')
         """
         result = client.query(query).result()
         ids = {row.id for row in result}

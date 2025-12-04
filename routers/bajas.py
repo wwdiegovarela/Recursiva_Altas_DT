@@ -35,13 +35,20 @@ def get_bajas_cargar():
                 except Exception:
                     pass
             if ids_exitosos and "rut" in data.columns and "fecharetiro" in data.columns:
-                fecha1 = pd.to_datetime(data["fecharetiro"], format="%Y-%m-%d", errors="coerce")
-                fecha2 = pd.to_datetime(data["fecharetiro"], format="%d-%m-%Y", errors="coerce")
+                # Normalización robusta de fecha
+                raw = data["fecharetiro"].astype(str).str.strip()
+                raw = raw.str.replace("/", "-", regex=False).str.slice(0, 10)
+                fecha1 = pd.to_datetime(raw, errors="coerce")
+                fecha2 = pd.to_datetime(raw, errors="coerce", dayfirst=True)
                 fecha_norm = fecha1.fillna(fecha2)
                 fecha_str = fecha_norm.dt.strftime("%Y-%m-%d")
                 try:
                     _nat = int(fecha_norm.isna().sum())
                     log_print(logs, f"Fechas no parseadas (NaT) en fecharetiro: {_nat}")
+                    _ej_raw = raw.head(5).tolist()
+                    log_print(logs, f"Ejemplos fechas origen (bajas): {_ej_raw}")
+                    _ej_fmt = fecha_str.head(5).tolist()
+                    log_print(logs, f"Ejemplos fechas normalizadas (bajas): {_ej_fmt}")
                 except Exception:
                     pass
                 rut_norm = data["rut"].astype(str).str.replace(".", "", regex=False).str.strip()
