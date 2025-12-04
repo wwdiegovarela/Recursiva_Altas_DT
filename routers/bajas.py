@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import traceback
 from config import TOKEN_BAJAS
-from services.utils import consulta_cr
+from services.utils import consulta_cr, log_print
 from infra.bigquery import cargar_a_bigquery, obtener_ids_exitosos
 from models.schemas import ResultadoCargasBajasRequest
 import numpy as np
@@ -13,7 +13,9 @@ router = APIRouter()
 
 @router.get("/dt/bajas/cargar")
 def get_bajas_cargar():
+    logs = []
     try:
+        log_print(logs, "Extrayendo datos de bajas...")
         data = consulta_cr(TOKEN_BAJAS)
         data = data.rename(columns={
             "descripcion_causal": "causal",
@@ -25,24 +27,44 @@ def get_bajas_cargar():
         # Excluir registros ya cargados exitosamente (según tabla de resultados de bajas)
         try:
             ids_exitosos = obtener_ids_exitosos(tabla="worldwide-470917.cargas_recursiva.resultado_cargas_bajas")
+            log_print(logs, f"IDs exitosos (bajas) obtenidos: {len(ids_exitosos)}")
+            if ids_exitosos:
+                try:
+                    _ej = list(ids_exitosos)[:5]
+                    log_print(logs, f"Ejemplos IDs exitosos (BQ bajas): {_ej}")
+                except Exception:
+                    pass
             if ids_exitosos and "rut" in data.columns and "fecharetiro" in data.columns:
                 fecha1 = pd.to_datetime(data["fecharetiro"], format="%Y-%m-%d", errors="coerce")
                 fecha2 = pd.to_datetime(data["fecharetiro"], format="%d-%m-%Y", errors="coerce")
                 fecha_norm = fecha1.fillna(fecha2)
                 fecha_str = fecha_norm.dt.strftime("%Y-%m-%d")
+                try:
+                    _nat = int(fecha_norm.isna().sum())
+                    log_print(logs, f"Fechas no parseadas (NaT) en fecharetiro: {_nat}")
+                except Exception:
+                    pass
                 rut_norm = data["rut"].astype(str).str.replace(".", "", regex=False).str.strip()
                 ids_candidatos = rut_norm + "_" + fecha_str.fillna("")
+                try:
+                    _ej2 = ids_candidatos.head(5).tolist()
+                    log_print(logs, f"Ejemplos IDs candidatos (bajas): {_ej2}")
+                except Exception:
+                    pass
+                _before = len(data)
                 mask = ~ids_candidatos.isin(ids_exitosos)
                 data = data[mask]
+                _after = len(data)
+                log_print(logs, f"Filtrado por exitosos (bajas): removidos {_before - _after} de {_before}")
         except Exception:
             # Si falla la consulta a BQ, continuamos sin filtrar
-            pass
+            log_print(logs, "Advertencia: fallo consulta de exitosos en BQ, no se filtra bajas")
         sample = data.head(1).to_json(orient="records")
         data_json = data.replace({np.nan: None}).to_dict(orient="records")
-        return {"ok": True, "sample": sample, "data": data_json}
+        return {"ok": True, "sample": sample, "data": data_json, "logs": logs}
     except Exception as e:
         err = f"{type(e).__name__}: {str(e)}"
-        return JSONResponse(status_code=500, content={"ok": False, "error": err, "traceback": traceback.format_exc()})
+        return JSONResponse(status_code=500, content={"ok": False, "error": err, "traceback": traceback.format_exc(), "logs": logs})
 
 
 @router.post("/dt/bajas/resultado")

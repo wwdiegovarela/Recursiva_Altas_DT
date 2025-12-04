@@ -110,23 +110,44 @@ def get_altas():
         # Excluir ya exitosos
         try:
             ids_exitosos = obtener_ids_exitosos()
+            log_print(logs, f"IDs exitosos obtenidos de BQ: {len(ids_exitosos)}")
+            if ids_exitosos:
+                try:
+                    _ej = list(ids_exitosos)[:5]
+                    log_print(logs, f"Ejemplos IDs exitosos (BQ): {_ej}")
+                except Exception:
+                    pass
             if ids_exitosos:
                 contract_date_col = 'FECHA_SUSCRPCION' if 'FECHA_SUSCRPCION' in data.columns else ('FECHA_INI_RELABORAL' if 'FECHA_INI_RELABORAL' in data.columns else None)
+                log_print(logs, f"Columna de fecha usada para ID: {contract_date_col}")
                 if contract_date_col and 'RUT_TRABAJADOR' in data.columns:
                     fecha1 = pd.to_datetime(data[contract_date_col], format='%Y-%m-%d', errors='coerce')
                     fecha2 = pd.to_datetime(data[contract_date_col], format='%d-%m-%Y', errors='coerce')
                     fecha_norm = fecha1.fillna(fecha2)
+                    try:
+                        _nat = int(fecha_norm.isna().sum())
+                        log_print(logs, f"Fechas no parseadas (NaT) en {contract_date_col}: {_nat}")
+                    except Exception:
+                        pass
                     fecha_str = fecha_norm.dt.strftime('%Y-%m-%d')
                     rut_norm = data['RUT_TRABAJADOR'].astype(str).str.replace('.', '', regex=False).str.strip()
                     ids_candidatos = rut_norm + '_' + fecha_str.fillna('')
+                    try:
+                        _ej2 = ids_candidatos.head(5).tolist()
+                        log_print(logs, f"Ejemplos IDs candidatos: {_ej2}")
+                    except Exception:
+                        pass
+                    _before = len(data)
                     mask = ~ids_candidatos.isin(ids_exitosos)
                     data = data[mask]
+                    _after = len(data)
+                    log_print(logs, f"Filtrado por exitosos: removidos {_before - _after} de {_before}")
         except Exception as _:
             pass
 
         data_final_json = data.replace({np.nan: None}).to_dict(orient="records")
         sample = data.head(1).to_json(orient="records")
-        return {"ok": True, "sample": sample, "data": data_final_json}
+        return {"ok": True, "sample": sample, "data": data_final_json, "logs": logs}
     except Exception as e:
         err = f"{type(e).__name__}: {str(e)}"
         log_print(logs, f"❌ Error en proceso: {err}")
