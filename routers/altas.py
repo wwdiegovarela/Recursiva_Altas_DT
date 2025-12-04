@@ -118,23 +118,46 @@ def get_altas():
                 except Exception:
                     pass
             if ids_exitosos:
-                contract_date_col = 'FECHA_SUSCRPCION' if 'FECHA_SUSCRPCION' in data.columns else ('FECHA_INI_RELABORAL' if 'FECHA_INI_RELABORAL' in data.columns else None)
-                log_print(logs, f"Columna de fecha usada para ID: {contract_date_col}")
-                if contract_date_col and 'RUT_TRABAJADOR' in data.columns:
-                    fecha1 = pd.to_datetime(data[contract_date_col], format='%Y-%m-%d', errors='coerce')
-                    fecha2 = pd.to_datetime(data[contract_date_col], format='%d-%m-%Y', errors='coerce')
-                    fecha_norm = fecha1.fillna(fecha2)
+                tiene_f_susc = 'FECHA_SUSCRPCION' in data.columns
+                tiene_f_ini = 'FECHA_INI_RELABORAL' in data.columns
+                log_print(logs, f"Columnas fecha presentes: FECHA_SUSCRPCION={tiene_f_susc}, FECHA_INI_RELABORAL={tiene_f_ini}")
+                if (tiene_f_susc or tiene_f_ini) and 'RUT_TRABAJADOR' in data.columns:
+                    # Normalización robusta por columna
+                    fecha_norm = None
+                    if tiene_f_susc:
+                        raw_s = data['FECHA_SUSCRPCION'].astype(str).str.strip().str.replace('/', '-', regex=False).str.slice(0, 10)
+                        f1s = pd.to_datetime(raw_s, errors='coerce')
+                        f2s = pd.to_datetime(raw_s, errors='coerce', dayfirst=True)
+                        fecha_susc = f1s.fillna(f2s)
+                        try:
+                            log_print(logs, f"NaT en FECHA_SUSCRPCION tras parseo: {int(fecha_susc.isna().sum())}")
+                            log_print(logs, f"Ejemplos FECHA_SUSCRPCION origen: {raw_s.head(5).tolist()}")
+                            log_print(logs, f"Ejemplos FECHA_SUSCRPCION normalizada: {fecha_susc.dt.strftime('%Y-%m-%d').head(5).tolist()}")
+                        except Exception:
+                            pass
+                        fecha_norm = fecha_susc
+                    if tiene_f_ini:
+                        raw_i = data['FECHA_INI_RELABORAL'].astype(str).str.strip().str.replace('/', '-', regex=False).str.slice(0, 10)
+                        f1i = pd.to_datetime(raw_i, errors='coerce')
+                        f2i = pd.to_datetime(raw_i, errors='coerce', dayfirst=True)
+                        fecha_ini = f1i.fillna(f2i)
+                        try:
+                            log_print(logs, f"NaT en FECHA_INI_RELABORAL tras parseo: {int(fecha_ini.isna().sum())}")
+                            log_print(logs, f"Ejemplos FECHA_INI_RELABORAL origen: {raw_i.head(5).tolist()}")
+                            log_print(logs, f"Ejemplos FECHA_INI_RELABORAL normalizada: {fecha_ini.dt.strftime('%Y-%m-%d').head(5).tolist()}")
+                        except Exception:
+                            pass
+                        fecha_norm = fecha_norm.combine_first(fecha_ini) if fecha_norm is not None else fecha_ini
+                    # Reporte final de NaT y generación de IDs
                     try:
-                        _nat = int(fecha_norm.isna().sum())
-                        log_print(logs, f"Fechas no parseadas (NaT) en {contract_date_col}: {_nat}")
+                        log_print(logs, f"NaT final tras fallback: {int(fecha_norm.isna().sum())}")
                     except Exception:
                         pass
                     fecha_str = fecha_norm.dt.strftime('%Y-%m-%d')
                     rut_norm = data['RUT_TRABAJADOR'].astype(str).str.replace('.', '', regex=False).str.strip()
                     ids_candidatos = rut_norm + '_' + fecha_str.fillna('')
                     try:
-                        _ej2 = ids_candidatos.head(5).tolist()
-                        log_print(logs, f"Ejemplos IDs candidatos: {_ej2}")
+                        log_print(logs, f"Ejemplos IDs candidatos: {ids_candidatos.head(5).tolist()}")
                     except Exception:
                         pass
                     _before = len(data)
