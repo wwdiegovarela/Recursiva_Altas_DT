@@ -57,10 +57,10 @@ def obtener_ids_exitosos(tabla: str = "worldwide-470917.cargas_recursiva.resulta
             client = bigquery.Client(project="worldwide-470917")
 
         query = f"""
-        SELECT CONCAT(CAST(rut AS STRING), '_', CAST(fecha_contrato AS STRING)) AS id
+        SELECT DISTINCT
+          COALESCE(CAST(id AS STRING), CONCAT(CAST(rut AS STRING), '_', CAST(fecha_contrato AS STRING))) AS id
         FROM `{tabla}`
-        WHERE estado in ('Exitoso','Terminado')
-        GROUP BY id
+        WHERE LOWER(TRIM(estado)) IN ('exitoso','terminado','ok')
         """
         result = client.query(query).result()
         ids = {row.id for row in result}
