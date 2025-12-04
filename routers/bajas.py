@@ -66,6 +66,9 @@ def get_bajas_cargar():
         except Exception:
             # Si falla la consulta a BQ, continuamos sin filtrar
             log_print(logs, "Advertencia: fallo consulta de exitosos en BQ, no se filtra bajas")
+        # Añadir columna rut_empresa como primera columna del output
+        data["rut_empresa"] = "76195703-1"
+        data = data[["rut_empresa", "rut","fechaingreso", "fecharetiro", "causal", "comentario"]]
         sample = data.head(1).to_json(orient="records")
         data_json = data.replace({np.nan: None}).to_dict(orient="records")
         return {"ok": True, "sample": sample, "data": data_json, "logs": logs}
