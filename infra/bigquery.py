@@ -58,7 +58,17 @@ def obtener_ids_exitosos(tabla: str = "worldwide-470917.cargas_recursiva.resulta
 
         query = f"""
         SELECT DISTINCT
-          COALESCE(CAST(id AS STRING), CONCAT(CAST(rut AS STRING), '_', CAST(fecha_contrato AS STRING))) AS id
+          -- Normaliza: quita puntos y espacios para empatar con IDs candidatos
+          REGEXP_REPLACE(
+            TRIM(
+              COALESCE(
+                CAST(id AS STRING),
+                CONCAT(TRIM(CAST(rut AS STRING)), '_', CAST(fecha_contrato AS STRING))
+              )
+            ),
+            r'\\.',
+            ''
+          ) AS id
         FROM `{tabla}`
         WHERE LOWER(TRIM(estado)) IN ('exitoso','terminado','ok')
         """

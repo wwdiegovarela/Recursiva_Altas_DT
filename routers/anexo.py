@@ -91,7 +91,8 @@ def get_anexo_cargar():
                     fecha2 = pd.to_datetime(data[contract_date_col], format='%d-%m-%Y', errors='coerce')
                     fecha_norm = fecha1.fillna(fecha2)
                     fecha_str = fecha_norm.dt.strftime('%Y-%m-%d')
-                    ids_candidatos = data['RUT_TRABAJADOR'].astype(str) + '_' + fecha_str.fillna('')
+                    rut_norm = data['RUT_TRABAJADOR'].astype(str).str.replace('.', '', regex=False).str.strip()
+                    ids_candidatos = rut_norm + '_' + fecha_str.fillna('')
                     mask = ~ids_candidatos.isin(ids_exitosos)
                     data = data[mask]
         except Exception as _:

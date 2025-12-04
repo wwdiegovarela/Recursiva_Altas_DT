@@ -30,7 +30,8 @@ def get_bajas_cargar():
                 fecha2 = pd.to_datetime(data["fecharetiro"], format="%d-%m-%Y", errors="coerce")
                 fecha_norm = fecha1.fillna(fecha2)
                 fecha_str = fecha_norm.dt.strftime("%Y-%m-%d")
-                ids_candidatos = data["rut"].astype(str) + "_" + fecha_str.fillna("")
+                rut_norm = data["rut"].astype(str).str.replace(".", "", regex=False).str.strip()
+                ids_candidatos = rut_norm + "_" + fecha_str.fillna("")
                 mask = ~ids_candidatos.isin(ids_exitosos)
                 data = data[mask]
         except Exception:
