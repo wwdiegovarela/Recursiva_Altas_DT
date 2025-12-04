@@ -59,7 +59,7 @@ def obtener_ids_exitosos(tabla: str = "worldwide-470917.cargas_recursiva.resulta
         query = f"""
         SELECT CONCAT(CAST(rut AS STRING), '_', CAST(fecha_contrato AS STRING)) AS id
         FROM `{tabla}`
-        WHERE estado = 'Exitoso'
+        WHERE estado in ('Exitoso','Terminado')
         GROUP BY id
         """
         result = client.query(query).result()
